@@ -1,6 +1,6 @@
 # Look up bucket
 data "aws_s3_bucket" "backing" {
-  bucket=var.bravo-vignette
+  bucket=var.bucket_name
 }
 
 # Create policy & role to permit reading from the bucket.
