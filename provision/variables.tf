@@ -1,13 +1,41 @@
 variable "region" {
   description = "The region Terraform deploys your instances"
   type        = string
-  default     = "us-west-2"
+  default     = "us-east-2"
+}
+
+variable "app_ami" {
+  description = "AMI to use for the application"
+  type        = string
+  default     = "false"
+}
+
+variable "app_domain" {
+  description = "Domain to direct to load balancer."
+  type        = string
+  default     = "false"
+}
+
+variable "app_inst_type" {
+  description = "Instance type for application"
+  type        = string
+  default     = "t3a.large"
 }
 
 variable "vpc_cidr_block" {
   description = "CIDR block for VPC"
   type        = string
   default     = "10.0.0.0/16"
+}
+
+variable "key_pair_name" {
+  description = "Name of existing keypair to use for bastion host"
+  type        = string
+}
+
+variable "bucket_name" {
+  description = "Name of bucket with backing vignette data"
+  type        = string
 }
 
 variable "enable_vpn_gateway" {
@@ -67,5 +95,5 @@ variable "enable_blue_env" {
 variable "blue_instance_count" {
   description = "Number of instances in blue environment"
   type        = number
-  default     = 2
+  default     = 1
 }
