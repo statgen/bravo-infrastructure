@@ -97,3 +97,9 @@ variable "blue_instance_count" {
   type        = number
   default     = 1
 }
+
+variable "install_httpd" {
+  description = "Install simple httpd to debug provisioning"
+  type        = bool
+  default     = false
+}

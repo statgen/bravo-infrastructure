@@ -11,9 +11,7 @@ resource "aws_instance" "blue" {
   iam_instance_profile   = aws_iam_instance_profile.s3_read_bucket.name
   associate_public_ip_address = true
 
-  user_data = templatefile("${path.module}/init-script.sh", {
-    file_content = "version 1.0 - #${count.index}"
-  })
+  user_data = var.install_httpd ? file("${path.module}/init-script.sh") : null
 
   tags = {
     Name = "version-1.0-${count.index}"
