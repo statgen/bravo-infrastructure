@@ -9,3 +9,7 @@ output "bastion_public_ip" {
 output "blue_private_ip" {
   value = "${aws_instance.blue.*.private_ip}"
 }
+
+output "pet_name" {
+  value = "${random_pet.app.id}"
+}
