@@ -1,5 +1,5 @@
-resource "aws_instance" "blue" {
-  count = var.enable_blue_env ? var.blue_instance_count : 0
+resource "aws_instance" "app_server" {
+  count = var.enable_app_server_env ? var.app_server_instance_count : 0
 
   ami                    = var.app_ami ? var.app_ami : data.aws_ami.ubuntu.id
   instance_type          = var.app_inst_type
@@ -19,8 +19,8 @@ resource "aws_instance" "blue" {
   }
 }
 
-resource "aws_lb_target_group" "blue" {
-  name     = "blue-two-tg-${random_pet.app.id}-lb"
+resource "aws_lb_target_group" "app_server" {
+  name     = "app_server-two-tg-${random_pet.app.id}-lb"
   port     = 8080
   protocol = "HTTP"
   vpc_id   = module.vpc.vpc_id
@@ -33,9 +33,9 @@ resource "aws_lb_target_group" "blue" {
   }
 }
 
-resource "aws_lb_target_group_attachment" "blue" {
-  count            = length(aws_instance.blue)
-  target_group_arn = aws_lb_target_group.blue.arn
-  target_id        = aws_instance.blue[count.index].id
+resource "aws_lb_target_group_attachment" "app_server" {
+  count            = length(aws_instance.app_server)
+  target_group_arn = aws_lb_target_group.app_server.arn
+  target_id        = aws_instance.app_server[count.index].id
   port             = 8080
 }

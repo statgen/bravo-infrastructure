@@ -6,8 +6,8 @@ output "bastion_public_ip" {
   value = "${aws_instance.bastion.public_ip}"
 }
 
-output "blue_private_ip" {
-  value = "${aws_instance.blue.*.private_ip}"
+output "app_server_private_ip" {
+  value = "${aws_instance.app_server.*.private_ip}"
 }
 
 output "pet_name" {
