@@ -36,6 +36,10 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
+data "aws_acm_certificate" "subdomain" {
+  domain = var.app_domain
+}
+
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "3.0.0"
@@ -107,7 +111,7 @@ resource "aws_lb_listener" "front_secure" {
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = "arn:aws:acm:us-east-2:931601792379:certificate/6702d1f7-c27b-4bef-b786-2d23beca60fc"
+  certificate_arn   = data.aws_acm_certificate.subdomain.arn
 
   default_action {
     type             = "forward"
