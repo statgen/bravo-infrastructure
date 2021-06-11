@@ -24,8 +24,7 @@ module "bastion_security_group" {
 
   ingress_rules       = ["ssh-tcp"]
   ingress_cidr_blocks = ["0.0.0.0/0"]
-  # egress_rules        = ["ssh-tcp"]
-  egress_rules = ["ssh-tcp", "http-80-tcp", "http-8080-tcp", "https-443-tcp", "https-8443-tcp"]
+  egress_rules        = ["ssh-tcp"]
 }
 
 module "bastion_access_security_group" {
@@ -42,7 +41,6 @@ module "bastion_access_security_group" {
       source_security_group_id = module.bastion_security_group.security_group_id
     },
   ]
-
   number_of_computed_ingress_with_source_security_group_id = 1
 
   depends_on = [module.bastion_security_group]

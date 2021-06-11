@@ -60,13 +60,25 @@ module "app_security_group" {
   version = "4.2.0"
 
   name        = "web-sg"
-  description = "Security group for web-servers with HTTP ports open within VPC"
+  description = "Security group for web-servers to communicate with load balancer."
   vpc_id      = module.vpc.vpc_id
 
-  #ingress_cidr_blocks = module.vpc.public_subnets_cidr_blocks
-  ingress_cidr_blocks = ["0.0.0.0/0"]
-  ingress_rules = ["http-80-tcp", "http-8080-tcp", "https-443-tcp", "https-8443-tcp"]
-  egress_rules = ["http-80-tcp", "http-8080-tcp", "https-443-tcp", "https-8443-tcp"]
+  #egress_rules = ["http-8080-tcp"]
+  computed_egress_with_source_security_group_id = [
+    { 
+      rule                     = "http-8080-tcp",
+      source_security_group_id = module.lb_security_group.security_group_id 
+    },
+  ]
+  number_of_computed_egress_with_source_security_group_id = 1
+
+  computed_ingress_with_source_security_group_id = [
+    { 
+      rule                     = "http-8080-tcp",
+      source_security_group_id = module.lb_security_group.security_group_id 
+    },
+  ]
+  number_of_computed_ingress_with_source_security_group_id = 1
 }
 
 module "lb_security_group" {
@@ -102,7 +114,7 @@ resource "aws_lb_listener" "front_insecure" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.blue_two.arn
+    target_group_arn = aws_lb_target_group.blue.arn
   }
 }
 
@@ -115,7 +127,7 @@ resource "aws_lb_listener" "front_secure" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.blue_two.arn
+    target_group_arn = aws_lb_target_group.blue.arn
   }
 }
 
