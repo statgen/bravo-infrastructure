@@ -9,7 +9,7 @@ Terraform config derived from
 
 See [Provisioning readme](provision/readme.md).
 
-## Deploy Applicaitons
+## Deploy Applications
 Ansible playbook to install, configure, load data, and run BRAVO's components.
 
 See [Deployment readme](deploy/readme.md).
