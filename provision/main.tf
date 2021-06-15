@@ -51,7 +51,19 @@ module "vpc" {
   private_subnets = slice(var.private_subnet_cidr_blocks, 0, var.private_subnet_count)
   public_subnets  = slice(var.public_subnet_cidr_blocks, 0, var.public_subnet_count)
 
-  enable_nat_gateway = false
+  enable_ipv6                     = true
+  assign_ipv6_address_on_creation = true
+
+  private_subnet_ipv6_prefixes = slice(range(10,17), 0, var.public_subnet_count)
+  public_subnet_ipv6_prefixes  = slice(range(0,7), 0, var.public_subnet_count)
+
+  public_subnet_assign_ipv6_address_on_creation  = true
+  private_subnet_assign_ipv6_address_on_creation = false
+
+  enable_nat_gateway     = true
+  single_nat_gateway     = true
+  one_nat_gateway_per_az = false
+
   enable_vpn_gateway = var.enable_vpn_gateway
 }
 
@@ -63,7 +75,6 @@ module "app_security_group" {
   description = "Security group for web-servers to communicate with load balancer."
   vpc_id      = module.vpc.vpc_id
 
-  #egress_rules = ["http-8080-tcp"]
   computed_egress_with_source_security_group_id = [
     { 
       rule                     = "http-8080-tcp",
@@ -79,6 +90,20 @@ module "app_security_group" {
     },
   ]
   number_of_computed_ingress_with_source_security_group_id = 1
+}
+
+module "updates_security_group" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "4.2.0"
+
+  name        = "updates-sg"
+  description = "Security group to allow https egress."
+  vpc_id      = module.vpc.vpc_id
+
+  # Permit http & https so apt and git can fetch dependencies.
+  egress_rules = ["http-80-tcp", "https-443-tcp"]
+  egress_cidr_blocks = ["0.0.0.0/0"]
+  egress_ipv6_cidr_blocks = ["::/0"]
 }
 
 module "lb_security_group" {

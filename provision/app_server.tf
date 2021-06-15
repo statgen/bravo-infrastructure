@@ -6,7 +6,8 @@ resource "aws_instance" "app_server" {
   #subnet_id              = module.vpc.public_subnets[count.index % length(module.vpc.public_subnets)]
   subnet_id              = module.vpc.private_subnets[count.index % length(module.vpc.public_subnets)]
   vpc_security_group_ids = [module.app_security_group.security_group_id,
-                            module.bastion_access_security_group.security_group_id]
+                            module.bastion_access_security_group.security_group_id,
+                            module.updates_security_group.security_group_id]
 
   key_name               = var.key_pair_name
   iam_instance_profile   = aws_iam_instance_profile.s3_read_bucket.name
