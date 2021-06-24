@@ -10,9 +10,6 @@
 export DEBIAN_FRONTEND=noninteractive
 sudo apt update -y
 sudo apt upgrade -y
-#sudo apt install mini-httpd -y
-#sudo syustemctl enable mini-httpd
-#sudo syustemctl start mini-httpd
 
 ####################################
 # Simple HTTP Server for Debugging #
