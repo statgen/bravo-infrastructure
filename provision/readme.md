@@ -8,6 +8,8 @@ Creates an application load balancer for SSL termination
 - A cert for that domain that covers bravo subdomain in SANs.
     e.g cert for example.com having *.example.com or bravo.example.com in SAN list.
 - Backing vignette data in an S3 bucket.
+    - Available from: [bravo\_vignette\_data.tar.bz2](ftp://share.sph.umich.edu/bravo/bravo_vignette_data.tar.bz2)
+    - Put in your own S3 bucket as is.
 
 ## Required Terraform Variables
 - Name of key pair to use to access EC2 instances.

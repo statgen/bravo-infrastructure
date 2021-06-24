@@ -6,20 +6,23 @@ Three roles:
 - Run applications as systemd services.
 
 ## Dependencies
-Requires community.mongodb collection
-```
-ansible-galaxy collection install -r requirements.yml
-```
+- Requires community.mongodb collection
+    ```
+    ansible-galaxy collection install -r requirements.yml
+    ```
+- Requires `bravo_vignette_data.tar.bz2` in an accessible S3 bucket.
 
 ## Run Deployment
 The `../make_ansible_support_files.sh` script emits a command that will run ansible.
 It assumes the terraform statefile exists in `provision/` after terrform has run.
-The command emitted should be:
+The command emitted is meant to be run from the `deploy/` directory:
 ```
 ansible-playbook --ssh-common-args='-F ../deploy-ssh-config' -i '../deploy-inventory' playbook.yml
 ```
 
-The command is meant to be run from the `deploy/` directory.
+The group var that might need to be changed is the `data_bucket`.  Use `-e 'data_bucket=your_bucket'`
+
+
 
 ## Data Loading 
 The data loading step is expensive.
