@@ -1,0 +1,31 @@
+[Unit]
+Description=BRAVO UI
+
+[Service]
+Type=simple
+
+User=ubuntu
+Group=ubuntu
+
+WorkingDirectory={{code_dir}}/ui
+
+Environment="FLASK_ENV=production"
+Environment="FLASK_APP=bravo_browser"
+Environment="BRAVO_UI_CONFIG_FILE=config.py"
+Environment="BRAVO_UI_INSTANCE_DIR={{inst_dir}}/ui"
+
+RuntimeDirectory=bravo-ui
+PIDFile=/run/bravo-ui/bravo.pid
+
+ExecStart={{inst_dir}}/ui/venv/bin/gunicorn -b 0.0.0.0:8080 --pid /run/bravo-ui/bravo.pid -w 3 -k gevent "bravo_browser:create_app()"
+ExecStop = /bin/kill -s TERM $MAINPID
+ExecReload=/bin/kill -s HUP $MAINPID
+TimeoutStopSec=5
+KillMode=mixed
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=bravo-ui
+
+[Install]
+WantedBy=multi-user.target

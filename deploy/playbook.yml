@@ -1,0 +1,275 @@
+---
+- hosts: app
+  become: yes
+  tags:
+    - dependencies
+  tasks:
+    - name: Upgrade packages
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: 'yes'
+
+    - name: Install python deployment dependencies
+      ansible.builtin.apt:
+        name: 
+          - python3-pip
+          - python3-venv
+        state: present
+
+    - name: Install virtualenv via pip
+      pip:
+        name: virtualenv
+        executable: pip3
+      become: yes
+
+
+- hosts: app
+  become: yes
+  tags:
+    - dependencies
+  tasks:
+    - name: Register reboot required file
+      stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+
+    - name: Reboot if Required
+      reboot:
+      when: reboot_required.stat.exists
+
+
+- hosts: app
+  become: no
+  tags:
+    - code
+  tasks:
+    - name: Create code dir
+      ansible.builtin.file:
+        path: "{{code_dir}}"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Checkout API code
+      ansible.builtin.git:
+        clone: yes
+        depth: 1
+        version: vignette
+        dest: "{{code_dir}}/api"
+        repo: https://github.com/statgen/bravo_api.git
+
+    - name: Checkout UI code
+      ansible.builtin.git:
+        clone: yes
+        depth: 1
+        version: main
+        dest: "{{code_dir}}/ui"
+        repo: https://github.com/statgen/bravo_ui.git
+
+
+- hosts: app
+  become: no
+  tags:
+    - instance
+  tasks:
+    - name: Create API instance dir
+      ansible.builtin.file:
+        path: "{{inst_dir}}/api"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+          
+    - name: Create UI instance dir
+      ansible.builtin.file:
+        path: "{{inst_dir}}/ui"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Setup API venv
+      ansible.builtin.pip:
+        requirements: "{{code_dir}}/api/requirements.txt"
+        virtualenv: "{{inst_dir}}/api/venv"
+        state: present
+
+    - name: Setup API venv prod additions
+      ansible.builtin.pip:
+        requirements: "{{code_dir}}/api/requirements_prod.txt"
+        virtualenv: "{{inst_dir}}/api/venv"
+
+    - name: Setup UI venv
+      ansible.builtin.pip:
+        requirements: "{{code_dir}}/ui/requirements.txt"
+        virtualenv: "{{inst_dir}}/ui/venv"
+        state: present
+
+    - name: Setup UI venv prod additions
+      ansible.builtin.pip:
+        virtualenv: "{{inst_dir}}/ui/venv"
+        name: 
+          - gunicorn
+          - gevent
+        state: present
+
+    - name: Create API config
+      ansible.builtin.template:
+        mode: 0775
+        dest: "{{inst_dir}}/api/config.py"
+        src: templates/config_api.py.j2
+
+    - name: Create UI config
+      ansible.builtin.template:
+        mode: 0775
+        dest: "{{inst_dir}}/ui/config.py"
+        src: templates/config_ui.py.j2
+
+
+- hosts: app
+  become: yes
+  tags:
+    - instance
+    - systemd
+  tasks:
+    - name: Create systemd service for API
+      ansible.builtin.template:
+        mode: 0755
+        dest: /etc/systemd/system/bravo-api.service
+        src: templates/bravo-api.service.j2
+
+    - name: Create systemd service for API
+      ansible.builtin.template:
+        mode: 0755
+        dest: /etc/systemd/system/bravo-ui.service
+        src: templates/bravo-ui.service.j2
+
+    - name: Reload systemd daemons
+      ansible.builtin.systemd:
+        name: bravo-api.service.j2
+
+
+- hosts: app
+  become: no
+  tags:
+    - data
+  tasks:
+    - name: Install boto requirement
+      ansible.builtin.pip:
+        name: 
+          - boto3
+          - botocore
+        state: present
+    - name: Download vignette data from bucket.
+      amazon.aws.aws_s3:
+        bucket: "{{data_bucket}}"
+        object: bravo_vignette_data.tar.bz2
+        dest: "{{base_dir}}/bravo_vignette_data.tar.bz2"
+        mode: get
+        overwrite: never
+
+    - name: Unpack vignette data.
+      ansible.builtin.unarchive:
+        src: "{{base_dir}}/bravo_vignette_data.tar.bz2"
+        dest: "{{base_dir}}"
+        remote_src: yes
+        creates: "{{base_dir}}/data"
+
+
+- hosts: mongo
+  become: yes
+  tags: 
+    - database
+    - dependencies
+  roles:
+    - role: community.mongodb.mongodb_repository
+      vars:
+        mongodb_version: "4.4"
+
+    - role: community.mongodb.mongodb_install
+      vars:
+        specific_mongodb_version: "4.4.6"
+  tasks:
+    - name: Start mongod service
+      ansible.builtin.systemd:
+        name: mongod.service
+        state: started
+
+
+- hosts: app
+  become: no
+  gather_facts: no
+  tags:
+    - data
+    - loading
+  environment:
+    - FLASK_ENV: development
+    - FLASK_APP: bravo_api
+    - BRAVO_API_CONFIG_FILE: config.py
+    - BRAVO_API_INSTANCE_DIR: "{{inst_dir}}/api"
+  tasks:
+    - name: Load genes 
+      ansible.builtin.command:
+        chdir: "{{code_dir}}/api"
+        creates: "{{base_dir}}/load_genes.lock"
+        cmd: >
+          {{inst_dir}}/api/venv/bin/flask load-genes
+          {{base_dir}}/data/basis/reference/canonical_transcripts.tsv.gz 
+          {{base_dir}}/data/basis/reference/omim_ensembl_refs.tsv.gz 
+          {{base_dir}}/data/basis/reference/hgcn_genenames.tsv.gz 
+          {{base_dir}}/data/basis/reference/gencode.v38.annotation.gtf.gz 
+      register: genes_result
+
+    - name: Gene loading lock file
+      ansible.builtin.file:
+        path: "{{base_dir}}/load_genes.lock"
+        state: touch
+      when: genes_result is succeeded and not genes_result is skipped
+
+    - name: Load SNV 
+      ansible.builtin.shell:
+        chdir: "{{code_dir}}/api"
+        creates: "{{base_dir}}/load_snv.lock"
+        cmd: >
+          {{inst_dir}}/api/venv/bin/flask load-snv 2
+          {{base_dir}}/data/basis/vcfs/*.vcf.gz 
+      register: snv_result
+
+    - name: SNV loading lock file
+      ansible.builtin.file:
+        path: "{{base_dir}}/load_snv.lock"
+        state: touch
+      when: snv_result is succeeded and not snv_result is skipped
+
+    - name: Load qc metrics 
+      ansible.builtin.shell:
+        chdir: "{{code_dir}}/api"
+        creates: "{{base_dir}}/load_qc.lock"
+        cmd: >
+          {{inst_dir}}/api/venv/bin/flask load-qc-metrics
+          {{base_dir}}/data/basis/qc_metrics/metrics.json.gz 
+      register: qc_result
+
+    - name: SNV loading lock file
+      ansible.builtin.file:
+        path: "{{base_dir}}/load_qc.lock"
+        state: touch
+      when: qc_result is succeeded and not qc_result is skipped
+
+- hosts: app
+  become: yes
+  gather_facts: no
+  tags:
+    - systemd
+    - start
+  tasks:
+    - name: Start API service
+      ansible.builtin.systemd:
+        daemon_reload: yes
+        name: bravo-api.service
+        enabled: yes
+        state: started
+    - name: Start UI service
+      ansible.builtin.systemd:
+        daemon_reload: yes
+        name: bravo-ui.service
+        enabled: yes
+        state: started
