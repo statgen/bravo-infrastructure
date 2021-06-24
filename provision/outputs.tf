@@ -13,3 +13,7 @@ output "app_server_private_ip" {
 output "pet_name" {
   value = "${random_pet.app.id}"
 }
+
+output "bucket_name" {
+  value = var.bucket_name
+}

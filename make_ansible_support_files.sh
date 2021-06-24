@@ -8,6 +8,7 @@
 TERRAFORM_JSON=$(terraform output -json -state=provision/terraform.tfstate)
 
 # Parse json into env variables
+BUCKET_NAME=$(echo "${TERRAFORM_JSON}" | jq -r '.bucket_name.value')
 PET_NAME=$(echo "${TERRAFORM_JSON}" | jq -r '.pet_name.value')
 BASTION_PUBLIC_IP=$(echo "${TERRAFORM_JSON}" | jq -r '.bastion_public_ip.value')
 APP_SERVER_PRIVATE_IP=$(echo "${TERRAFORM_JSON}" | jq -r '.app_server_private_ip.value[0]')
@@ -33,6 +34,9 @@ ${PET_NAME}-bastion
 
 [app]
 ${PET_NAME}-app
+
+[app:vars]
+data_bucket=${BUCKET_NAME}
 
 [mongo]
 ${PET_NAME}-app
