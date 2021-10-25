@@ -7,6 +7,8 @@ The second is an ansible script to deploy and start the application.
 
 ## Dependencies
 
+Make sure to record the names of the keypair, bucket, and domain you'll be using.  They are required input parameters to the terraform provisioning.
+
 ### Software
 - An [AWS account](https://aws.amazon.com).  The resources will incur charges to your account.
 - [AWS CLI installed](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) 
@@ -25,44 +27,66 @@ For running this project a subset of chr11 has been used to make a small data se
 It is available here: ftp://share.sph.umich.edu/bravo/bravo_vignette_data.tar.bz2
 The provisioning and deployment expect the archive to be in a S3 bucket.
 
+For example:
 ```sh
 # Create bucket for holding the bravo data.  
-aws --region=us-east-2 s3 mb "s3://your-bravo-bucket" 
+aws s3 mb "s3://my-bravo-bucket" 
+
+# Put data in the bucket
+aws s3 cp ./bravo_vignette_data.tar.bz2 s3://my-bravo-bucket
 ```
 
 ### Domain name and Certificate
+You'll need a domain registered on
+[Route53](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/registrar.html)
+and a 
+[public TLS certificate](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html) 
+that covers the domain you'll be serving the application from.
 
-
-## Provision Infrastrucutre on AWS
+## 1. Provision Infrastrucutre on AWS
 Terraform config derived from 
 [this Hashicorp tutorial](https://learn.hashicorp.com/tutorials/terraform/blue-green-canary-tests-deployments)
 
 See [Provisioning readme](provision/readme.md).
 
-## Deploy Applications
+## 2. Deploy Applications
 Ansible playbook to install, configure, load data, and run BRAVO's components.
 
 See [Deployment readme](deploy/readme.md).
 
 ## Use
+Manual run of infrastructure provisioning and deployment of applications.
+
+### Configure Terraform Variables
+Edit `provision/my-terraform-env-vars.sh` with the name of the keypair, bucket, and domain you'll be using.
+
+### Run Terraform and Ansible
+First use terraform to provision the VMs and infrastructure.
+Subsequently use ansible to deploy the applications.
 
 ```sh 
-# Script to export my TF_VARs
+# Move into provisioning directory
+cd provision
+
+# Script to export terraform variables
 source my-terraform-env-vars.sh
 
-# Do provisioning
-cd provision
+# Run terraform
 terraform apply
 
 # (Optional) print convenient ssh commands for bastion or app server. 
 ./print_ssh_cmd.sh
 
-# Create Ansible config from terraform state
+# Move back to root directory
 cd ..
+
+# Create Ansible config from terraform state
 ./make_ansible_support_files.sh
 
-# Do deployment
+# Move into deployment directory
 cd deploy
+
+# Run ansible
 ansible-playbook --ssh-common-args='-F ../deploy-ssh-config' -i '../deploy-inventory' playbook.yml
 ```
 
@@ -81,5 +105,4 @@ ansible-playbook --ssh-common-args='-F ../deploy-ssh-config' -i '../deploy-inven
 - Make clear how to get the bravo\_vignette data.
 - Consider makeing and publishing a pre-built AMI or container to avoid Anisble install.
 - Use Ubuntu image for bastion as well for uniformity.
-- Make clear that deployment will incur costs.
 

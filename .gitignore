@@ -32,3 +32,7 @@ deploy-ssh-config
 
 # Scratch files used for one off tests, demos, experiments, etc
 scratch*
+
+# Data files
+*.tar
+*.bz2
