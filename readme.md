@@ -7,7 +7,8 @@ The second is an ansible script to deploy and start the application.
 
 ## Dependencies
 
-Make sure to record the names of the keypair, bucket, and domain you'll be using.  They are required input parameters to the terraform provisioning.
+Make sure to record the names of the keypair, bucket, and domain you'll be using.  
+They are required input parameters to the terraform provisioning.
 
 ### Software
 - An [AWS account](https://aws.amazon.com).  The resources will incur charges to your account.
@@ -41,7 +42,7 @@ You'll need a domain registered on
 [Route53](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/registrar.html)
 and a 
 [public TLS certificate](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html) 
-that covers the domain you'll be serving the application from.
+that covers your domain and a bravo subdomain (e.g. bravo.example.com). 
 
 ## 1. Provision Infrastrucutre on AWS
 Terraform config derived from 
@@ -58,7 +59,8 @@ See [Deployment readme](deploy/readme.md).
 Manual run of infrastructure provisioning and deployment of applications.
 
 ### Configure Terraform Variables
-Edit `provision/my-terraform-env-vars.sh` with the name of the keypair, bucket, and domain you'll be using.
+Edit `provision/my-terraform-env-vars.sh` with the name of the keypair, bucket, and domain name you'll be using.
+note: the deployment will wire the application server to the bravo subdomain (e.g. bravo.example.com)
 
 ### Run Terraform and Ansible
 First use terraform to provision the VMs and infrastructure.
