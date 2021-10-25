@@ -22,7 +22,7 @@ Generate ssh keys to use to access the EC2 instances:
 An archive of data needs to be in place in an S3 bucket before running this project.
 
 For running this project a subset of chr11 has been used to make a small data set.
-It is available here: [bravo\_vignette\_data.tar.bz2](ftp://share.sph.umich.edu/bravo/bravo_vignette_data.tar.bz2)
+It is available here: ftp://share.sph.umich.edu/bravo/bravo_vignette_data.tar.bz2
 The provisioning and deployment expect the archive to be in a S3 bucket.
 
 ```sh
