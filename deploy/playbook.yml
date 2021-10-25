@@ -158,6 +158,9 @@
           - boto3
           - botocore
         state: present
+    - name: debug bucket variable
+      ansible.builtin.debug:
+        msg: "{{data_bucket}}"
     - name: Download vignette data from bucket.
       amazon.aws.aws_s3:
         bucket: "{{data_bucket}}"

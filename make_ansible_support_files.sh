@@ -33,10 +33,7 @@ cat << INVENTORYDOC > deploy-inventory
 ${PET_NAME}-bastion
 
 [app]
-${PET_NAME}-app
-
-[app:vars]
-data_bucket=${BUCKET_NAME}
+${PET_NAME}-app data_bucket=${BUCKET_NAME}
 
 [mongo]
 ${PET_NAME}-app

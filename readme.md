@@ -5,6 +5,34 @@ To that end, this project is partitioned into two parts.
 The first provisions infrastructure on AWS on which to run the applications.
 The second is an ansible script to deploy and start the application.
 
+## Dependencies
+
+### Software
+- An [AWS account](https://aws.amazon.com).  The resources will incur charges to your account.
+- [AWS CLI installed](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) 
+- [Terraform installed](https://learn.hashicorp.com/tutorials/terraform/install-cli) 
+- Terraform [configured for your aws account](https://learn.hashicorp.com/tutorials/terraform/aws-build).
+- [Ansible installed](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) 
+
+### AWS EC2 KeyPair
+Generate ssh keys to use to access the EC2 instances: 
+[key-pair docs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#prepare-key-pair)
+
+### Data in a bucket
+An archive of data needs to be in place in an S3 bucket before running this project.
+
+For running this project a subset of chr11 has been used to make a small data set.
+It is available here: [bravo\_vignette\_data.tar.bz2](ftp://share.sph.umich.edu/bravo/bravo_vignette_data.tar.bz2)
+The provisioning and deployment expect the archive to be in a S3 bucket.
+
+```sh
+# Create bucket for holding the bravo data.  
+aws --region=us-east-2 s3 mb "s3://your-bravo-bucket" 
+```
+
+### Domain name and Certificate
+
+
 ## Provision Infrastrucutre on AWS
 Terraform config derived from 
 [this Hashicorp tutorial](https://learn.hashicorp.com/tutorials/terraform/blue-green-canary-tests-deployments)
@@ -38,4 +66,20 @@ cd deploy
 ansible-playbook --ssh-common-args='-F ../deploy-ssh-config' -i '../deploy-inventory' playbook.yml
 ```
 
+## Improvements to be made
+
+- Make it as easy as possible for someone to deploy with as few commands as possible. 
+    - Link to terraform installer
+    - Link to ansible installers.
+- Make as many choices for the end user as you possibly can.
+    - Using default values in the variables
+    - Handling cases to minimize requirements
+        - Make domain & cert optional
+        - Make S3 data bucket optional
+    - Allow specifying a pre-existing VPC
+- List the variables and a description of what they do like Terraform modules
+- Make clear how to get the bravo\_vignette data.
+- Consider makeing and publishing a pre-built AMI or container to avoid Anisble install.
+- Use Ubuntu image for bastion as well for uniformity.
+- Make clear that deployment will incur costs.
 
