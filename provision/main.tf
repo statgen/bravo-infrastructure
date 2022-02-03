@@ -1,12 +1,26 @@
 # default instance of provider
 provider "aws" {
   region = var.region
+  default_tags {
+    tags = {
+      Environment = "test"
+      Terraform = "true"
+      Project = "bravo"
+    }
+  }
 }
 
 # us-east-1 provider instance when it is required to use this region
 provider "aws" {
   region = "us-east-1"
   alias = "useast1"
+  default_tags {
+    tags = {
+      Environment = "test"
+      Terraform = "true"
+      Project = "bravo"
+    }
+  }
 }
 
 data "aws_availability_zones" "available" {
@@ -14,7 +28,7 @@ data "aws_availability_zones" "available" {
 }
 
 data "aws_route53_zone" "domain" {
-  name = "contrapaganza.com"
+  name = var.app_domain
 }
 
 data "aws_ami" "ubuntu" {

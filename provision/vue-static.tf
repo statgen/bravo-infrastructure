@@ -30,8 +30,9 @@ resource "aws_s3_bucket" "vue_site" {
   }
 
   tags = {
-    ManagedBy = "terraform"
-    Changed   = formatdate("YYYY-MM-DD hh:mm ZZZ", timestamp())
+    # Cannot use computed tag in addtion to default tags.
+    # https://github.com/hashicorp/terraform-provider-aws/issues/19583
+    # Changed   = formatdate("YYYY-MM-DD hh:mm ZZZ", timestamp())
   }
 }
 
@@ -104,8 +105,9 @@ resource "aws_cloudfront_distribution" "website_cdn_root" {
   }
 
   tags = {
-    ManagedBy = "terraform"
-    Changed   = formatdate("YYYY-MM-DD hh:mm ZZZ", timestamp())
+    # Cannot use computed tag in addtion to default tags.
+    # https://github.com/hashicorp/terraform-provider-aws/issues/19583
+    # Changed   = formatdate("YYYY-MM-DD hh:mm ZZZ", timestamp())
   }
 }
 

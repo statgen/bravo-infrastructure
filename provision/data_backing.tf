@@ -63,11 +63,6 @@ resource "aws_iam_role" "s3_read_only" {
       },
     ]
   })
-
-  tags = {
-    project = "Bravo"
-    stage = "demo"
-  }
 }
 
 resource "aws_iam_role_policy_attachment" "s3_read_only" {

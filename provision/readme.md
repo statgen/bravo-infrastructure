@@ -5,22 +5,25 @@ Creates an application load balancer for SSL termination
 - AWS Account
 - Terraform configured for use with your AWS account
 - Existing Domain registered with Route53 e.g. example.com
-- A cert for that domain that covers bravo subdomain in SANs.
-    e.g cert for example.com having *.example.com or bravo.example.com in SAN list.
+- A cert for that domain that with a SAN that covers bravo subdomain in SANs.
+    - Expected cert name is the top level name e.g. `example.com`
+    - e.g Cert with name `example.com` having `*.example.com` or `bravo.example.com` in SAN list.
 - Backing vignette data in an S3 bucket.
-    - Available from: ftp://share.sph.umich.edu/bravo/bravo_vignette_data.tar.bz2)
-    - Put in your own S3 bucket as is.
+    - Available from: ftp://share.sph.umich.edu/bravo/bravo_vignette_data.tar.bz2
+    - Backing data needs to be present in bucket.
 
 ## Required Terraform Variables
 - Name of key pair to use to access EC2 instances.
 - Name of hosted zone under which `bravo` subdomain record will be created.
-- Name of bucket that contains vignette backing data.
+- Name of bucket that will contain vignette backing data.
 
 Env vars as convenience method for development
 ```sh
 export TF_VAR_key_pair_name=my-example-aws-key
 export TF_VAR_app_domain=example.com
 export TF_VAR_bucket_name=my-example-data
+# Specify which AWS credentials profile to use.
+export AWS_PROFILE=statgen
 ```
 
 ## Development debugging simple httpd server

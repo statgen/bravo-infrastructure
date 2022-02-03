@@ -43,6 +43,8 @@ You'll need a domain registered on
 and a 
 [public TLS certificate](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html) 
 that covers your domain and a bravo subdomain (e.g. bravo.example.com). 
+This **cert name** needs to be the domain and tld.  e.g. example.com.
+The cert needs to have an additional name (SAN) that covers the subdomain.
 
 ## 1. Provision Infrastrucutre on AWS
 Terraform config derived from 

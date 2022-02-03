@@ -34,7 +34,7 @@ variable "key_pair_name" {
 }
 
 variable "bucket_name" {
-  description = "Name of bucket with backing vignette data"
+  description = "Name of bucket backing vignette data is stored in"
   type        = string
 }
 
