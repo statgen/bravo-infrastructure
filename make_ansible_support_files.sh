@@ -9,6 +9,7 @@ TERRAFORM_JSON=$(terraform output -json -state=provision/terraform.tfstate)
 
 # Parse json into env variables
 BUCKET_NAME=$(echo "${TERRAFORM_JSON}" | jq -r '.bucket_name.value')
+SITE_BUCKET=$(echo "${TERRAFORM_JSON}" | jq -r '.static_site_bucket.value')
 PET_NAME=$(echo "${TERRAFORM_JSON}" | jq -r '.pet_name.value')
 BASTION_PUBLIC_IP=$(echo "${TERRAFORM_JSON}" | jq -r '.bastion_public_ip.value')
 APP_SERVER_PRIVATE_IP=$(echo "${TERRAFORM_JSON}" | jq -r '.app_server_private_ip.value[0]')
@@ -31,6 +32,7 @@ SSHDOC
 cat << INVENTORYDOC > deploy-inventory
 [bastion]
 ${PET_NAME}-bastion
+site_bucket=${SITE_BUCKET}
 
 [app]
 ${PET_NAME}-app data_bucket=${BUCKET_NAME}
@@ -39,5 +41,7 @@ ${PET_NAME}-app data_bucket=${BUCKET_NAME}
 ${PET_NAME}-app
 INVENTORYDOC
 
-echo -e "To use from deploy directory:\n\
+echo -e "# Move to deploy directory:\n\
+cd deploy\n\
+# Run ansible playbook
 ansible-playbook --ssh-common-args='-F ../deploy-ssh-config' -i '../deploy-inventory' playbook.yml\n"
