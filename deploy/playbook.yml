@@ -58,15 +58,6 @@
         dest: "{{code_dir}}/api"
         repo: https://github.com/statgen/bravo_api.git
 
-    - name: Checkout UI code
-      ansible.builtin.git:
-        clone: yes
-        depth: 1
-        version: main
-        dest: "{{code_dir}}/ui"
-        repo: https://github.com/statgen/bravo_ui.git
-
-
 - hosts: app
   become: no
   tags:
@@ -79,13 +70,6 @@
         owner: ubuntu
         group: ubuntu
           
-    - name: Create UI instance dir
-      ansible.builtin.file:
-        path: "{{inst_dir}}/ui"
-        state: directory
-        owner: ubuntu
-        group: ubuntu
-
     - name: Setup API venv
       ansible.builtin.pip:
         requirements: "{{code_dir}}/api/requirements.txt"
@@ -96,16 +80,6 @@
       ansible.builtin.pip:
         requirements: "{{code_dir}}/api/requirements_prod.txt"
         virtualenv: "{{inst_dir}}/api/venv"
-
-    - name: Setup UI venv
-      ansible.builtin.pip:
-        requirements: "{{code_dir}}/ui/requirements.txt"
-        virtualenv: "{{inst_dir}}/ui/venv"
-        state: present
-
-    - name: Setup UI venv prod additions
-      ansible.builtin.pip:
-        virtualenv: "{{inst_dir}}/ui/venv"
         name: 
           - gunicorn
           - gevent
@@ -116,13 +90,6 @@
         mode: 0775
         dest: "{{inst_dir}}/api/config.py"
         src: templates/config_api.py.j2
-
-    - name: Create UI config
-      ansible.builtin.template:
-        mode: 0775
-        dest: "{{inst_dir}}/ui/config.py"
-        src: templates/config_ui.py.j2
-
 
 - hosts: app
   become: yes
@@ -135,12 +102,6 @@
         mode: 0755
         dest: /etc/systemd/system/bravo-api.service
         src: templates/bravo-api.service.j2
-
-    - name: Create systemd service for API
-      ansible.builtin.template:
-        mode: 0755
-        dest: /etc/systemd/system/bravo-ui.service
-        src: templates/bravo-ui.service.j2
 
     - name: Reload systemd daemons
       ansible.builtin.systemd:
@@ -268,11 +229,5 @@
       ansible.builtin.systemd:
         daemon_reload: yes
         name: bravo-api.service
-        enabled: yes
-        state: started
-    - name: Start UI service
-      ansible.builtin.systemd:
-        daemon_reload: yes
-        name: bravo-ui.service
         enabled: yes
         state: started
