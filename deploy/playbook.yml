@@ -72,7 +72,7 @@
           
     - name: Setup API venv
       ansible.builtin.pip:
-        requirements: "{{code_dir}}/api/requirements.txt"
+        name: "git+https://github.com/statgen/bravo_api.git"
         virtualenv: "{{inst_dir}}/api/venv"
         state: present
 
