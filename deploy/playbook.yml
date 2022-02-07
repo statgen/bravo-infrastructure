@@ -52,7 +52,7 @@
     - name: Setup API venv
       ansible.builtin.pip:
         name: 
-          - "git+https://github.com/statgen/bravo_api.git@modules"
+          - "git+https://github.com/statgen/bravo_api.git"
           - gunicorn
           - gevent
         virtualenv: "{{inst_dir}}/api/venv"
