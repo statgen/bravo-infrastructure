@@ -50,13 +50,13 @@
         owner: ubuntu
         group: ubuntu
 
-    - name: Checkout API code
-      ansible.builtin.git:
-        clone: yes
-        depth: 1
-        version: vignette
-        dest: "{{code_dir}}/api"
-        repo: https://github.com/statgen/bravo_api.git
+    # - name: Checkout API code
+    #   ansible.builtin.git:
+    #     clone: yes
+    #     depth: 1
+    #     version: vignette
+    #     dest: "{{code_dir}}/api"
+    #     repo: https://github.com/statgen/bravo_api.git
 
 - hosts: app
   become: no
@@ -72,17 +72,11 @@
           
     - name: Setup API venv
       ansible.builtin.pip:
-        name: "git+https://github.com/statgen/bravo_api.git"
-        virtualenv: "{{inst_dir}}/api/venv"
-        state: present
-
-    - name: Setup API venv prod additions
-      ansible.builtin.pip:
-        requirements: "{{code_dir}}/api/requirements_prod.txt"
-        virtualenv: "{{inst_dir}}/api/venv"
         name: 
+          - "git+https://github.com/statgen/bravo_api.git@modules"
           - gunicorn
           - gevent
+        virtualenv: "{{inst_dir}}/api/venv"
         state: present
 
     - name: Create API config
@@ -150,7 +144,7 @@
 
     - role: community.mongodb.mongodb_install
       vars:
-        specific_mongodb_version: "4.4.6"
+        specific_mongodb_version: "4.4"
   tasks:
     - name: Start mongod service
       ansible.builtin.systemd:
@@ -172,7 +166,7 @@
   tasks:
     - name: Load genes 
       ansible.builtin.command:
-        chdir: "{{code_dir}}/api"
+        chdir: "{{code_dir}}"
         creates: "{{base_dir}}/load_genes.lock"
         cmd: >
           {{inst_dir}}/api/venv/bin/flask load-genes
@@ -190,7 +184,7 @@
 
     - name: Load SNV 
       ansible.builtin.shell:
-        chdir: "{{code_dir}}/api"
+        chdir: "{{code_dir}}"
         creates: "{{base_dir}}/load_snv.lock"
         cmd: >
           {{inst_dir}}/api/venv/bin/flask load-snv 2
@@ -205,7 +199,7 @@
 
     - name: Load qc metrics 
       ansible.builtin.shell:
-        chdir: "{{code_dir}}/api"
+        chdir: "{{code_dir}}"
         creates: "{{base_dir}}/load_qc.lock"
         cmd: >
           {{inst_dir}}/api/venv/bin/flask load-qc-metrics
