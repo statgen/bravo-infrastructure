@@ -37,27 +37,6 @@
       reboot:
       when: reboot_required.stat.exists
 
-
-- hosts: app
-  become: no
-  tags:
-    - code
-  tasks:
-    - name: Create code dir
-      ansible.builtin.file:
-        path: "{{code_dir}}"
-        state: directory
-        owner: ubuntu
-        group: ubuntu
-
-    # - name: Checkout API code
-    #   ansible.builtin.git:
-    #     clone: yes
-    #     depth: 1
-    #     version: vignette
-    #     dest: "{{code_dir}}/api"
-    #     repo: https://github.com/statgen/bravo_api.git
-
 - hosts: app
   become: no
   tags:
@@ -143,8 +122,8 @@
         mongodb_version: "4.4"
 
     - role: community.mongodb.mongodb_install
-      vars:
-        specific_mongodb_version: "4.4"
+      # vars:
+      #   specific_mongodb_version: "4.4"
   tasks:
     - name: Start mongod service
       ansible.builtin.systemd:
@@ -166,7 +145,6 @@
   tasks:
     - name: Load genes 
       ansible.builtin.command:
-        chdir: "{{code_dir}}"
         creates: "{{base_dir}}/load_genes.lock"
         cmd: >
           {{inst_dir}}/api/venv/bin/flask load-genes
@@ -184,7 +162,6 @@
 
     - name: Load SNV 
       ansible.builtin.shell:
-        chdir: "{{code_dir}}"
         creates: "{{base_dir}}/load_snv.lock"
         cmd: >
           {{inst_dir}}/api/venv/bin/flask load-snv 2
@@ -199,7 +176,6 @@
 
     - name: Load qc metrics 
       ansible.builtin.shell:
-        chdir: "{{code_dir}}"
         creates: "{{base_dir}}/load_qc.lock"
         cmd: >
           {{inst_dir}}/api/venv/bin/flask load-qc-metrics
