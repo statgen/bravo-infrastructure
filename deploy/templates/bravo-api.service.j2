@@ -7,7 +7,7 @@ Type=simple
 User=ubuntu
 Group=ubuntu
 
-WorkingDirectory={{code_dir}}/api
+WorkingDirectory={{inst_dir}}/api
 
 Environment="FLASK_ENV=production"
 Environment="FLASK_APP=bravo_api"
@@ -17,7 +17,7 @@ Environment="BRAVO_API_INSTANCE_DIR={{inst_dir}}/api"
 RuntimeDirectory=bravo-api
 PIDFile=/run/bravo-api/bravo.pid
 
-ExecStart={{inst_dir}}/api/venv/bin/gunicorn -b 0.0.0.0:9000 --pid /run/bravo-api/bravo.pid -w 3 -k gevent "bravo_api:create_app()"
+ExecStart={{inst_dir}}/api/venv/bin/gunicorn -b 0.0.0.0:8080 --pid /run/bravo-api/bravo.pid -w 3 -k gevent "bravo_api:create_app()"
 ExecStop = /bin/kill -s TERM $MAINPID
 ExecReload=/bin/kill -s HUP $MAINPID
 TimeoutStopSec=5
