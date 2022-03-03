@@ -36,3 +36,6 @@ scratch*
 # Data files
 *.tar
 *.bz2
+
+# sensitive configuration
+deploy/group_vars/app/auth.yml

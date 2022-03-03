@@ -2,5 +2,3 @@
 base_dir: "/home/ubuntu"
 code_dir: "/home/ubuntu/bravo-src"
 inst_dir: "/home/ubuntu/bravo-instance"
-data_bucket: "bravo-vignette-example"
-load_db_data: false
