@@ -20,3 +20,18 @@ SEQUENCES_CACHE_DIR = "{{base_dir}}/data/runtime/cache/"
 
 # path to reference sequence for cram files.  Assumes corresponding .fai exists next to .fa file
 REFERENCE_SEQUENCE = "{{base_dir}}/data/runtime/reference/chr11_hs38DH.fa"
+
+
+# Optional configuration
+{% if gauth_client_secret is defined and gauth_client_secret|length %}
+LOGIN_DISABLED = False
+{% else %}
+LOGIN_DISABLED = True
+{% endif %}
+SESSION_SECRET = b'deadbeef0123456789'
+CORS_ORIGINS = ['http://localhost:8080', 'http://127.0.0.1:8080']
+
+# Config for using Google OAuth
+GOOGLE_CLIENT_ID = "{{gauth_client_id | default('')}}"
+GOOGLE_CLIENT_SECRET = "{{gauth_client_secret | default('')}}"
+GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
