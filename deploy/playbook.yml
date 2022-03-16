@@ -57,6 +57,7 @@
           - gevent
         virtualenv: "{{inst_dir}}/api/venv"
         state: present
+        extra_args: "--upgrade"
 
     - name: Create API config
       ansible.builtin.template:

@@ -28,8 +28,8 @@ LOGIN_DISABLED = False
 {% else %}
 LOGIN_DISABLED = True
 {% endif %}
-SESSION_SECRET = b'deadbeef0123456789'
-CORS_ORIGINS = ['http://localhost:8080', 'http://127.0.0.1:8080']
+SESSION_SECRET = b'{{lookup('community.general.random_string',length=24)}}'
+CORS_ORIGINS = {{cors_origins}}
 
 # Config for using Google OAuth
 GOOGLE_CLIENT_ID = "{{gauth_client_id | default('')}}"
