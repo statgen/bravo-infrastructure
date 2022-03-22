@@ -14,7 +14,8 @@ They are required input parameters to the terraform provisioning.
 - An [AWS account](https://aws.amazon.com).  The resources will incur charges to your account.
 - [AWS CLI installed](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) 
 - [Terraform installed](https://learn.hashicorp.com/tutorials/terraform/install-cli) 
-- Terraform [configured for your aws account](https://learn.hashicorp.com/tutorials/terraform/aws-build).
+- [Terraform Cloud](https://cloud.hashicorp.com/products/terraform)
+- AWS Credentials in Terraform Cloud [workspace variables](https://learn.hashicorp.com/tutorials/terraform/cloud-workspace-configure)
 - [Ansible installed](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) 
 
 ### AWS EC2 KeyPair
@@ -45,6 +46,7 @@ and a
 that covers your domain and a bravo subdomain (e.g. bravo.example.com). 
 This **cert name** needs to be the domain and tld.  e.g. example.com.
 The cert needs to have an additional name (SAN) that covers the subdomain.
+E.g. SAN with bravo.example.com or \*.example.com
 
 ## 1. Provision Infrastrucutre on AWS
 Terraform config derived from 
@@ -61,8 +63,10 @@ See [Deployment readme](deploy/readme.md).
 Manual run of infrastructure provisioning and deployment of applications.
 
 ### Configure Terraform Variables
-Edit `provision/my-terraform-env-vars.sh` with the name of the keypair, bucket, and domain name you'll be using.
-note: the deployment will wire the application server to the bravo subdomain (e.g. bravo.example.com)
+Use terraform variables stored in workspace on terraform cloud.
+Or provide a terraform variables file with the name of the keypair, bucket, and domain name you'll be using.
+
+note: the app deployment will wire the application server to the bravo subdomain (e.g. bravo.example.com)
 
 ### Run Terraform and Ansible
 First use terraform to provision the VMs and infrastructure.
@@ -72,26 +76,20 @@ Subsequently use ansible to deploy the applications.
 # Move into provisioning directory
 cd provision
 
-# Script to export terraform variables
-source my-terraform-env-vars.sh
-
 # Run terraform
 terraform apply
 
 # (Optional) print convenient ssh commands for bastion or app server. 
 ./print_ssh_cmd.sh
 
-# Move back to root directory
-cd ..
+# Move into deployment directory
+cd ../deploy
 
-# Create Ansible config from terraform state
+# Create Ansible config from terraform cloud plan output
 ./make_ansible_support_files.sh
 
-# Move into deployment directory
-cd deploy
-
 # Run ansible
-ansible-playbook --ssh-common-args='-F ../deploy-ssh-config' -i '../deploy-inventory' playbook.yml
+ansible-playbook --ssh-common-args='-F inv/deploy-ssh-config' -i 'inv/deploy-inventory' playbook.yml
 ```
 
 ## Improvements to be made
