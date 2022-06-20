@@ -3,7 +3,6 @@ resource "aws_instance" "app_server" {
 
   ami                    = var.app_ami ? var.app_ami : data.aws_ami.ubuntu.id
   instance_type          = var.app_inst_type
-  #subnet_id              = module.vpc.public_subnets[count.index % length(module.vpc.public_subnets)]
   subnet_id              = module.vpc.private_subnets[count.index % length(module.vpc.public_subnets)]
   vpc_security_group_ids = [module.app_security_group.security_group_id,
                             module.bastion_access_security_group.security_group_id,
@@ -18,6 +17,20 @@ resource "aws_instance" "app_server" {
   tags = {
     Name = "version-1.0-${count.index}"
   }
+}
+
+resource "aws_ebs_volume" "app_data" {
+  availability_zone = data.aws_availability_zones.available.names[0]
+  type = "io2"
+  multi_attach_enabled = true
+  size = 20
+}
+
+resource "aws_volume_attachment" "app_data_attach" {
+  count       = length(aws_instance.app_server)
+  device_name = "/dev/sdh"
+  volume_id   = aws_ebs_volume.app_data.id
+  instance_id = aws_instance.app_server[count.index].id
 }
 
 resource "aws_lb_target_group" "app_server" {
