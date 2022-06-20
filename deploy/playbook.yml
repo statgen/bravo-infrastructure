@@ -96,21 +96,21 @@
     - name: debug bucket variable
       ansible.builtin.debug:
         msg: "{{data_bucket}}"
+
     - name: Download vignette data from bucket.
       amazon.aws.aws_s3:
         bucket: "{{data_bucket}}"
-        object: bravo_vignette_data.tar.bz2
-        dest: "{{base_dir}}/bravo_vignette_data.tar.bz2"
+        object: "{{data_tarball}}"
+        dest: "{{base_dir}}/{{data_tarball}}"
         mode: get
         overwrite: never
 
     - name: Unpack vignette data.
       ansible.builtin.unarchive:
-        src: "{{base_dir}}/bravo_vignette_data.tar.bz2"
+        src: "{{base_dir}}/{{data_tarball}}"
         dest: "{{base_dir}}"
         remote_src: yes
         creates: "{{base_dir}}/data"
-
 
 - hosts: mongo
   become: yes
