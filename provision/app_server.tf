@@ -22,12 +22,13 @@ resource "aws_instance" "app_server" {
 resource "aws_ebs_volume" "app_data" {
   availability_zone = data.aws_availability_zones.available.names[0]
   type = "io2"
-  multi_attach_enabled = true
+  iops = 125
   size = 20
 }
 
 resource "aws_volume_attachment" "app_data_attach" {
   count       = length(aws_instance.app_server)
+  # Will be auto-renamed nvme1n1
   device_name = "/dev/sdh"
   volume_id   = aws_ebs_volume.app_data.id
   instance_id = aws_instance.app_server[count.index].id
