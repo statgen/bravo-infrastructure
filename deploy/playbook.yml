@@ -22,7 +22,6 @@
         executable: pip3
       become: yes
 
-
 - hosts: app
   become: yes
   tags:
@@ -36,6 +35,41 @@
     - name: Reboot if Required
       reboot:
       when: reboot_required.stat.exists
+
+- hosts: app
+  tags:
+    - data
+  tasks:
+    - name: Create base directory mount point
+      become: yes
+      ansible.builtin.file:
+        path: "{{base_dir}}"
+        state: directory
+
+    # Could use ebsnvme-id from https://github.com/amazonlinux/amazon-ec2-utils  
+    #   to create symlinks that use the original volume name
+    - name: Format ebs volume
+      become: yes
+      ansible.builtin.filesystem:
+        dev: /dev/nvme1n1
+        fstype: ext4
+
+    - name: Mount ebs volume
+      become: yes
+      ansible.posix.mount:
+        src: /dev/nvme1n1
+        path: "{{base_dir}}"
+        fstype: ext4
+        state: mounted
+
+    - name: Set owner of mount point
+      become: yes
+      ansible.builtin.file:
+        path: "{{base_dir}}"
+        state: directory
+        owner: "{{ansible_user_id}}"
+        group: "{{ansible_user_id}}"
+
 
 - hosts: app
   become: no
@@ -81,9 +115,7 @@
       ansible.builtin.systemd:
         name: bravo-api.service.j2
 
-
 - hosts: app
-  become: no
   tags:
     - data
   tasks:
@@ -103,14 +135,13 @@
         object: "{{data_tarball}}"
         dest: "{{base_dir}}/{{data_tarball}}"
         mode: get
-        overwrite: never
 
     - name: Unpack vignette data.
       ansible.builtin.unarchive:
         src: "{{base_dir}}/{{data_tarball}}"
         dest: "{{base_dir}}"
         remote_src: yes
-        creates: "{{base_dir}}/data"
+        creates: "{{base_dir}}/data/basis_data"
 
 - hosts: mongo
   become: yes

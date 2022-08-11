@@ -28,7 +28,7 @@ LOGIN_DISABLED = False
 {% else %}
 LOGIN_DISABLED = True
 {% endif %}
-SESSION_SECRET = b'{{lookup('community.general.random_string',length=24)}}'
+SESSION_SECRET = b'{{lookup('community.general.random_string',length=24,special=false)}}'
 CORS_ORIGINS = {{cors_origins}}
 
 # Config for using Google OAuth

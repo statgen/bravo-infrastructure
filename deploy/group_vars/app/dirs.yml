@@ -1,4 +1,4 @@
 ---
-base_dir: "/home/ubuntu"
-code_dir: "/home/ubuntu/bravo-src"
-inst_dir: "/home/ubuntu/bravo-instance"
+base_dir: "/bravo"
+code_dir: "{{base_dir}}/src"
+inst_dir: "{{base_dir}}/instance"
