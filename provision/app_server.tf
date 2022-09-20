@@ -23,7 +23,7 @@ resource "aws_ebs_volume" "app_data" {
   availability_zone = data.aws_availability_zones.available.names[0]
   type = "io2"
   iops = 125
-  size = 20
+  size = 80
 }
 
 resource "aws_volume_attachment" "app_data_attach" {
