@@ -1,3 +1,10 @@
 ---
+# S3 bucket in which the backing data is stored
 data_bucket: "bravo-vignette-example"
-data_tarball: "bravo_50samples_data.tar.bz2"
+
+# Top level key prefix containing the basis and runtime prefixs (directories)
+data_key: "two_chr_bravo"
+
+# Flag determining if data download and load is run.
+#   Defaults to no.  Use -e "load_data=yes" to run data tasks.
+load_data: no

@@ -1,0 +1,98 @@
+---
+- hosts: app
+  vars:
+    data_dir: "{{base_dir}}/data"
+  tasks:
+    - name: Enumerate keys in bucket.
+      amazon.aws.aws_s3:
+        bucket: "{{data_bucket}}"
+        prefix: "{{data_key}}"
+        mode: list
+      register: s3list
+
+    - name: Convenience list of relative paths
+      ansible.builtin.set_fact:
+        rel_paths: "{{ s3list.s3_keys | map('replace', data_key + '/', '', 1) }}"
+
+    - name: Create data subdirectories
+      ansible.builtin.file:
+        path: "{{ (data_dir, item) | path_join}}"
+        state: directory
+      loop: "{{rel_paths | map('dirname') | unique}}"
+
+    - name: Stat paths for downloaded data
+      ansible.builtin.stat:
+        path: "{{(data_dir, item) | path_join}}"
+        get_checksum: no
+        get_mime: no
+        get_attributes: no
+      loop: "{{rel_paths}}"
+      register: statlist
+
+    - name: Get files from bucket.
+      amazon.aws.aws_s3:
+        bucket: "{{data_bucket}}"
+        object: "{{data_key}}/{{item}}"
+        dest:   "{{(data_dir, item) | path_join}}"
+        mode: get
+        overwrite: never
+      loop: "{{rel_paths}}"
+
+- hosts: app
+  become: no
+  gather_facts: no
+  environment:
+    - FLASK_ENV: development
+    - FLASK_APP: bravo_api
+    - BRAVO_API_CONFIG_FILE: config.py
+    - BRAVO_API_INSTANCE_DIR: "{{inst_dir}}/api"
+  tasks:
+    - name: Create cache dir. Mitigate issue 16
+      ansible.builtin.file:
+        path: "{{base_dir}}/data/runtime/cache/"
+        state: directory
+
+    - name: Load genes
+      ansible.builtin.command:
+        creates: "{{base_dir}}/load_genes.lock"
+        cmd: >
+          {{inst_dir}}/api/venv/bin/flask load-genes
+          {{base_dir}}/data/basis/reference/canonical_transcripts.tsv.gz
+          {{base_dir}}/data/basis/reference/omim_ensembl_refs.tsv.gz
+          {{base_dir}}/data/basis/reference/hgcn_genenames.tsv.gz
+          {{base_dir}}/data/basis/reference/gencode.v38.annotation.gtf.gz
+      register: genes_result
+
+    - name: Gene loading lock file
+      ansible.builtin.file:
+        path: "{{base_dir}}/load_genes.lock"
+        state: touch
+      when: genes_result is succeeded and not genes_result is skipped
+
+    - name: Load SNV
+      ansible.builtin.shell:
+        creates: "{{base_dir}}/load_snv.lock"
+        cmd: >
+          {{inst_dir}}/api/venv/bin/flask load-snv 2
+          {{base_dir}}/data/basis/vcfs/*.vcf.gz
+      register: snv_result
+
+    - name: SNV loading lock file
+      ansible.builtin.file:
+        path: "{{base_dir}}/load_snv.lock"
+        state: touch
+      when: snv_result is succeeded and not snv_result is skipped
+
+    - name: Load qc metrics
+      ansible.builtin.shell:
+        creates: "{{base_dir}}/load_qc.lock"
+        cmd: >
+          {{inst_dir}}/api/venv/bin/flask load-qc-metrics
+          {{base_dir}}/data/basis/qc_metrics/metrics.json.gz
+      register: qc_result
+
+    - name: QC loading lock file
+      ansible.builtin.file:
+        path: "{{base_dir}}/load_qc.lock"
+        state: touch
+      when: qc_result is succeeded and not qc_result is skipped

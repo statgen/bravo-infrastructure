@@ -17,12 +17,16 @@ The `../make_ansible_support_files.sh` script emits a command that will run ansi
 It assumes the terraform statefile exists in `provision/` after terrform has run.
 The command emitted is meant to be run from the `deploy/` directory:
 ```
-ansible-playbook --ssh-common-args='-F ../deploy-ssh-config' -i '../deploy-inventory' playbook.yml
+ansible-playbook --ssh-common-args='-F inv/deploy-ssh-config' -i 'inv/deploy-inventory' playbook.yml
 ```
 
-The group var that might need to be changed is the `data_bucket`.  Use `-e 'data_bucket=your_bucket'`
+### Download & Data Loading
+Need to provide two variables `data_bucket` and `load_data=yes`.
+```sh
+-e 'data_bucket=your_bucket_name' -e 'load_data=yes'
+```
 
-## Data Loading 
+## Data Loading
 The data loading step is expensive.
 The role creates lock files to indicate that it's already been run.
 This facilitates a hack to avoid trying to figure out if data needs to be reloaded.

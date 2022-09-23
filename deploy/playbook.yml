@@ -23,11 +23,10 @@
 
     - name: Install boto requirement
       ansible.builtin.pip:
-        name: 
+        name:
           - boto3
           - botocore
         state: present
-
 
 - hosts: app
   become: yes
@@ -45,7 +44,7 @@
 
 - hosts: app
   tags:
-    - data
+    - setup
   tasks:
     - name: Create base directory mount point
       become: yes
@@ -53,7 +52,7 @@
         path: "{{base_dir}}"
         state: directory
 
-    # Could use ebsnvme-id from https://github.com/amazonlinux/amazon-ec2-utils  
+    # Could use ebsnvme-id from https://github.com/amazonlinux/amazon-ec2-utils
     #   to create symlinks that use the original volume name
     - name: Format ebs volume
       become: yes
@@ -89,10 +88,10 @@
         state: directory
         owner: ubuntu
         group: ubuntu
-          
+
     - name: Setup API venv
       ansible.builtin.pip:
-        name: 
+        name:
           - "git+https://github.com/statgen/bravo_api.git"
           - gunicorn
           - gevent
@@ -105,6 +104,20 @@
         mode: 0775
         dest: "{{inst_dir}}/api/config.py"
         src: templates/config_api.py.j2
+
+- hosts: app
+  tags:
+    - data
+  tasks:
+    - name: Data Loading Condition
+      ansible.builtin.debug:
+        msg: "Data loading skipped because load_data = no"
+      when: not load_data
+
+    - name: Download and Load Data
+      ansible.builtin.include_role:
+        name: data_loading
+      when: load_data
 
 - hosts: app
   become: yes
@@ -122,31 +135,9 @@
       ansible.builtin.systemd:
         name: bravo-api.service.j2
 
-- hosts: app
-  tags:
-    - data
-  tasks:
-    - name: debug bucket variable
-      ansible.builtin.debug:
-        msg: "{{data_bucket}}"
-
-    - name: Download vignette data from bucket.
-      amazon.aws.aws_s3:
-        bucket: "{{data_bucket}}"
-        object: "{{data_tarball}}"
-        dest: "{{base_dir}}/{{data_tarball}}"
-        mode: get
-
-    - name: Unpack vignette data.
-      ansible.builtin.unarchive:
-        src: "{{base_dir}}/{{data_tarball}}"
-        dest: "{{base_dir}}"
-        remote_src: yes
-        creates: "{{base_dir}}/data/basis_data"
-
 - hosts: mongo
   become: yes
-  tags: 
+  tags:
     - database
     - dependencies
   roles:
@@ -162,64 +153,6 @@
       ansible.builtin.systemd:
         name: mongod.service
         state: started
-
-
-- hosts: app
-  become: no
-  gather_facts: no
-  tags:
-    - data
-    - loading
-  environment:
-    - FLASK_ENV: development
-    - FLASK_APP: bravo_api
-    - BRAVO_API_CONFIG_FILE: config.py
-    - BRAVO_API_INSTANCE_DIR: "{{inst_dir}}/api"
-  tasks:
-    - name: Load genes 
-      ansible.builtin.command:
-        creates: "{{base_dir}}/load_genes.lock"
-        cmd: >
-          {{inst_dir}}/api/venv/bin/flask load-genes
-          {{base_dir}}/data/basis/reference/canonical_transcripts.tsv.gz 
-          {{base_dir}}/data/basis/reference/omim_ensembl_refs.tsv.gz 
-          {{base_dir}}/data/basis/reference/hgcn_genenames.tsv.gz 
-          {{base_dir}}/data/basis/reference/gencode.v38.annotation.gtf.gz 
-      register: genes_result
-
-    - name: Gene loading lock file
-      ansible.builtin.file:
-        path: "{{base_dir}}/load_genes.lock"
-        state: touch
-      when: genes_result is succeeded and not genes_result is skipped
-
-    - name: Load SNV 
-      ansible.builtin.shell:
-        creates: "{{base_dir}}/load_snv.lock"
-        cmd: >
-          {{inst_dir}}/api/venv/bin/flask load-snv 2
-          {{base_dir}}/data/basis/vcfs/*.vcf.gz 
-      register: snv_result
-
-    - name: SNV loading lock file
-      ansible.builtin.file:
-        path: "{{base_dir}}/load_snv.lock"
-        state: touch
-      when: snv_result is succeeded and not snv_result is skipped
-
-    - name: Load qc metrics 
-      ansible.builtin.shell:
-        creates: "{{base_dir}}/load_qc.lock"
-        cmd: >
-          {{inst_dir}}/api/venv/bin/flask load-qc-metrics
-          {{base_dir}}/data/basis/qc_metrics/metrics.json.gz 
-      register: qc_result
-
-    - name: SNV loading lock file
-      ansible.builtin.file:
-        path: "{{base_dir}}/load_qc.lock"
-        state: touch
-      when: qc_result is succeeded and not qc_result is skipped
 
 - hosts: app
   become: yes
