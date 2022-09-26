@@ -140,6 +140,45 @@ module "lb_security_group" {
   egress_rules = ["http-80-tcp", "http-8080-tcp", "https-443-tcp", "https-8443-tcp"]
 }
 
+module "github_security_group" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "4.2.0"
+
+  name        = "git-sg"
+  description = "Security group for development with Github repo"
+  vpc_id      = module.vpc.vpc_id
+
+  egress_cidr_blocks = ["0.0.0.0/0"]
+  egress_ipv6_cidr_blocks = ["::/0"]
+
+  egress_with_cidr_blocks = [
+    {
+      from_port = 9418
+      to_port = 9418
+      protocol = "tcp"
+      description = "github ssh port"
+      cidr_blocks = "0.0.0.0/0"
+    },
+    {
+      rule = "ssh-tcp"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
+  egress_with_ipv6_cidr_blocks = [
+    {
+      from_port = 9418
+      to_port = 9418
+      protocol = "tcp"
+      description = "github ssh port"
+      cidr_blocks = "::/0"
+    },
+    {
+      rule = "ssh-tcp"
+      cidr_blocks = "::/0"
+    }
+  ]
+}
+
 resource "random_pet" "app" {
   length    = 2
   separator = "-"
