@@ -1,0 +1,11 @@
+---
+base_dir: "/bravo"
+data_dir: "{{base_dir}}/data"
+inst_dir: "{{base_dir}}/instance"
+
+# environment variables for running flask CLI
+bravo_env:
+  FLASK_ENV: development
+  FLASK_APP: bravo_api
+  BRAVO_API_CONFIG_FILE: config.py
+  BRAVO_API_INSTANCE_DIR: "{{inst_dir}}/api"
