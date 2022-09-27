@@ -106,20 +106,6 @@
         src: templates/config_api.py.j2
 
 - hosts: app
-  tags:
-    - data
-  tasks:
-    - name: Data Loading Condition
-      ansible.builtin.debug:
-        msg: "Data loading skipped because load_data = no"
-      when: not load_data
-
-    - name: Download and Load Data
-      ansible.builtin.include_role:
-        name: data_loading
-      when: load_data
-
-- hosts: app
   become: yes
   tags:
     - instance
@@ -153,6 +139,20 @@
       ansible.builtin.systemd:
         name: mongod.service
         state: started
+
+- hosts: app
+  tags:
+    - data
+  tasks:
+    - name: Data Loading Condition
+      ansible.builtin.debug:
+        msg: "Data loading skipped because load_data = no"
+      when: not load_data
+
+    - name: Download and Load Data
+      ansible.builtin.include_role:
+        name: data_loading
+      when: load_data
 
 - hosts: app
   become: yes
