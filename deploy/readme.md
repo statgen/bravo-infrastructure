@@ -21,9 +21,11 @@ ansible-playbook --ssh-common-args='-F inv/deploy-ssh-config' -i 'inv/deploy-inv
 ```
 
 ### Download & Data Loading
-Need to provide two variables `data_bucket` and `load_data=yes`.
+Need to provide two variables `data_bucket` and `load_data`.
+The first is the name of your s3 bucket without leading protocol (s3://).
+The second is either `true` or `false`. Use true to do the data loading.
 ```sh
--e 'data_bucket=your_bucket_name' -e 'load_data=yes'
+-e 'data_bucket=your_bucket_name load_data=true'
 ```
 
 ## Data Loading

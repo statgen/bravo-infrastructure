@@ -1,0 +1,26 @@
+---
+- name: Enumerate keys in bucket.
+  amazon.aws.aws_s3:
+    bucket: "{{data_bucket}}"
+    prefix: "{{data_key}}"
+    mode: list
+  register: s3list
+
+- name: Convenience list of relative paths
+  ansible.builtin.set_fact:
+    rel_paths: "{{ s3list.s3_keys | map('replace', data_key + '/', '', 1) }}"
+
+- name: Create data subdirectories
+  ansible.builtin.file:
+    path: "{{ (data_dir, item) | path_join}}"
+    state: directory
+  loop: "{{rel_paths | map('dirname') | unique}}"
+
+- name: Get files from bucket.
+  amazon.aws.aws_s3:
+    bucket: "{{data_bucket}}"
+    object: "{{data_key}}/{{item}}"
+    dest:   "{{(data_dir, item) | path_join}}"
+    mode: get
+    overwrite: never
+  loop: "{{rel_paths}}"

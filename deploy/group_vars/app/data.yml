@@ -6,5 +6,5 @@ data_bucket: "bravo-vignette-example"
 data_key: "two_chr_bravo"
 
 # Flag determining if data download and load is run.
-#   Defaults to no.  Use -e "load_data=yes" to run data tasks.
-load_data: no
+#   Defaults to false.  Use -e "load_data=true" to run data tasks.
+load_data: false

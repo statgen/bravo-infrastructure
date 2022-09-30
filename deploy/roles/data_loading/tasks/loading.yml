@@ -1,0 +1,56 @@
+---
+- name: Create cache dir. Mitigate issue 16
+  ansible.builtin.file:
+    path: "{{base_dir}}/data/runtime/cache/"
+    state: directory
+
+- name: Load genes
+  ansible.builtin.command:
+    creates: "{{base_dir}}/load_genes.lock"
+    cmd: >
+      {{inst_dir}}/api/venv/bin/flask load-genes
+      {{base_dir}}/data/basis/reference/canonical_transcripts.tsv.gz
+      {{base_dir}}/data/basis/reference/omim_ensembl_refs.tsv.gz
+      {{base_dir}}/data/basis/reference/hgcn_genenames.tsv.gz
+      {{base_dir}}/data/basis/reference/gencode.v38.annotation.gtf.gz
+  register: genes_result
+  environment: "{{bravo_env}}"
+  when: do_loading
+
+- name: Gene loading lock file
+  ansible.builtin.file:
+    path: "{{base_dir}}/load_genes.lock"
+    state: touch
+  when: genes_result is succeeded and not genes_result is skipped
+
+- name: Load SNV
+  ansible.builtin.shell:
+    creates: "{{base_dir}}/load_snv.lock"
+    cmd: >
+      {{inst_dir}}/api/venv/bin/flask load-snv 2
+      {{base_dir}}/data/basis/vcfs/*.vcf.gz
+  register: snv_result
+  environment: "{{bravo_env}}"
+  when: do_loading
+
+- name: SNV loading lock file
+  ansible.builtin.file:
+    path: "{{base_dir}}/load_snv.lock"
+    state: touch
+  when: snv_result is succeeded and not snv_result is skipped
+
+- name: Load qc metrics
+  ansible.builtin.shell:
+    creates: "{{base_dir}}/load_qc.lock"
+    cmd: >
+      {{inst_dir}}/api/venv/bin/flask load-qc-metrics
+      {{base_dir}}/data/basis/qc_metrics/metrics.json.gz
+  register: qc_result
+  environment: "{{bravo_env}}"
+  when: do_loading
+
+- name: QC loading lock file
+  ansible.builtin.file:
+    path: "{{base_dir}}/load_qc.lock"
+    state: touch
+  when: qc_result is succeeded and not qc_result is skipped
