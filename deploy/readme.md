@@ -16,9 +16,18 @@ Three roles:
 The `../make_ansible_support_files.sh` script emits a command that will run ansible.
 It assumes the terraform statefile exists in `provision/` after terrform has run.
 The command emitted is meant to be run from the `deploy/` directory:
+
+Full deployment including dependencies and data setup:
 ```
 ansible-playbook --ssh-common-args='-F inv/deploy-ssh-config' -i 'inv/deploy-inventory' playbook.yml
 ```
+
+Just redeploy the python application:
+```
+ansible-playbook --ssh-common-args='-F inv/deploy-ssh-config'\
+  -i 'inv/deploy-inventory' --tags instance playbook.yml
+```
+
 
 ### Download & Data Loading
 Need to provide two variables `data_bucket` and `load_data`.
