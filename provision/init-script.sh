@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Init script for debugging terraform provisioning. Used for checking the networking works.
+# This provides the application VM with a simple HTTP service as a stand in for the application.
+
 # AWS Linux images
 # sudo yum update -y
 # sudo yum install httpd -y
@@ -11,9 +14,9 @@ export DEBIAN_FRONTEND=noninteractive
 sudo apt update -y
 sudo apt upgrade -y
 
-####################################
-# Simple HTTP Server for Debugging #
-####################################
+######################
+# Simple HTTP Server #
+######################
 
 # Create basic html content
 sudo mkdir -p /var/www/html

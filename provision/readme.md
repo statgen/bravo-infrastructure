@@ -34,6 +34,6 @@ Enable running this init script as the instance user data with
 terraform apply -var='install_httpd=true'
 ```
 
-Don't use this when you will be deploying an application.
+Don't use this when you will be deploying an application (i.e. bravo-api).
 You'll get an error because the port to bind to is already in use.
 
