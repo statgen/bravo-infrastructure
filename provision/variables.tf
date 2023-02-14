@@ -10,6 +10,12 @@ variable "app_ami" {
   default     = "false"
 }
 
+variable "app_volume_size" {
+  description = "Size in Gb of attached volume for application"
+  type        = number
+  default     = 100
+}
+
 variable "app_domain" {
   description = "Domain to direct to load balancer."
   type        = string
