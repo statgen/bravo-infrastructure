@@ -121,6 +121,7 @@
       ansible.builtin.systemd:
         name: bravo-api.service.j2
 
+
 - hosts: mongo
   become: yes
   tags:
@@ -130,15 +131,38 @@
     - role: community.mongodb.mongodb_repository
       vars:
         mongodb_version: "4.4"
-
     - role: community.mongodb.mongodb_install
-      # vars:
-      #   specific_mongodb_version: "4.4"
+
+
+- hosts: mongo
+  become: yes
+  tags:
+    - database
+    - dependencies
   tasks:
-    - name: Start mongod service
+    - name: Create mongo db directory
+      ansible.builtin.file:
+        path: "{{base_dir}}/mongodata"
+        state: directory
+        group: mongodb
+        owner: mongodb
+    - name: Change mongo db data directory config
+      ansible.builtin.lineinfile:
+        path: /etc/mongod.conf
+        search_string: "  dbPath: /var/lib/mongodb"
+        line: "  dbPath: {{base_dir}}/mongodata"
+        state: present
+
+- hosts: mongo
+  become: yes
+  tags:
+    - database
+    - dependencies
+  tasks:
+    - name: Restart mongod service
       ansible.builtin.systemd:
         name: mongod.service
-        state: started
+        state: restarted
 
 - hosts: app
   tags:
