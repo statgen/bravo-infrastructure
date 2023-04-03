@@ -25,3 +25,11 @@ output "static_site_bucket" {
 output "api_domain" {
   value = var.api_domain
 }
+
+output "ui_domain" {
+  value = var.ui_domain
+}
+
+output "env_tag" {
+  value = var.env_tag
+}
