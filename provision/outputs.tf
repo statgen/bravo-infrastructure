@@ -21,3 +21,7 @@ output "bucket_name" {
 output "static_site_bucket" {
   value = aws_s3_bucket.vue_site.id
 }
+
+output "api_domain" {
+  value = var.api_domain
+}

@@ -4,6 +4,12 @@ variable "region" {
   default     = "us-east-2"
 }
 
+variable "env_tag" {
+  description = "The environment tag to apply to aws resources."
+  type        = string
+  default     = "test"
+}
+
 variable "app_ami" {
   description = "AMI to use for the application"
   type        = string
@@ -17,7 +23,19 @@ variable "app_volume_size" {
 }
 
 variable "app_domain" {
+  description = "Hosted Zone name covering the api and ui domains."
+  type        = string
+  default     = "false"
+}
+
+variable "api_domain" {
   description = "Domain to direct to load balancer."
+  type        = string
+  default     = "false"
+}
+
+variable "ui_domain" {
+  description = "Domain to direct to static site (UI)."
   type        = string
   default     = "false"
 }

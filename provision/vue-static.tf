@@ -1,7 +1,7 @@
-data "aws_acm_certificate" "main" {
+data "aws_acm_certificate" "ui_domain" {
   # Domain cert for CDN needs to be looked up in us-east-1 
   provider = aws.useast1
-  domain = var.app_domain
+  domain = var.ui_domain
 }
 
 # Policy doc to permit cloudfront to access anything in the bucket
@@ -53,7 +53,7 @@ resource "aws_cloudfront_distribution" "website_cdn_root" {
   
   # See: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/PriceClass.html
   price_class = "PriceClass_100"
-  aliases = ["bravue.${data.aws_route53_zone.domain.name}"]
+  aliases = ["${var.ui_domain}"]
 
   origin {
     origin_id   = "origin-bucket-${aws_s3_bucket.vue_site.id}"
@@ -93,7 +93,7 @@ resource "aws_cloudfront_distribution" "website_cdn_root" {
   }
 
   viewer_certificate {
-    acm_certificate_arn = data.aws_acm_certificate.main.arn
+    acm_certificate_arn = data.aws_acm_certificate.ui_domain.arn
     ssl_support_method  = "sni-only"
   }
 
@@ -112,9 +112,9 @@ resource "aws_cloudfront_distribution" "website_cdn_root" {
 }
 
 # Creates the DNS record to point on the main CloudFront distribution ID
-resource "aws_route53_record" "bravue" {
-  zone_id = data.aws_route53_zone.domain.zone_id
-  name    = "bravue.${data.aws_route53_zone.domain.name}"
+resource "aws_route53_record" "ui" {
+  zone_id = data.aws_route53_zone.app.zone_id
+  name    = var.ui_domain
   type    = "A"
   alias {
     name                   = aws_cloudfront_distribution.website_cdn_root.domain_name

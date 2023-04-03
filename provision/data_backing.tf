@@ -5,7 +5,7 @@ data "aws_s3_bucket" "backing" {
 
 # Create policy & role to permit reading from the bucket.
 resource "aws_iam_policy" "s3_read_only" {
-  name        = "s3_read_only"
+  name        = "s3_read_${random_pet.app.id}"
   path        = "/"
   description = "Allow EC2 instance to read a specified bucket"
 
@@ -48,7 +48,7 @@ resource "aws_iam_policy" "s3_read_only" {
 }
 
 resource "aws_iam_role" "s3_read_only" {
-  name = "s3_read_only"
+  name = "s3_read_${random_pet.app.id}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -71,6 +71,6 @@ resource "aws_iam_role_policy_attachment" "s3_read_only" {
 }
 
 resource "aws_iam_instance_profile" "s3_read_bucket" {
-  name = "s3_reading_profile"
+  name = "s3_reading_${random_pet.app.id}"
   role = aws_iam_role.s3_read_only.name
 }

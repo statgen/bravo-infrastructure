@@ -2,7 +2,7 @@ terraform {
   cloud {
     organization = "statgen"
     workspaces {
-      name = "bravo-ci-staging"
+      tags = ["bravo", "api"]
     }
   }
 

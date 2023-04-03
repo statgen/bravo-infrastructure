@@ -3,7 +3,7 @@ provider "aws" {
   region = var.region
   default_tags {
     tags = {
-      Environment = "test"
+      Environment = var.env_tag
       Terraform = "true"
       Project = "bravo"
     }
@@ -16,7 +16,7 @@ provider "aws" {
   alias = "useast1"
   default_tags {
     tags = {
-      Environment = "test"
+      Environment = var.env_tag
       Terraform = "true"
       Project = "bravo"
     }
@@ -27,8 +27,13 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
-data "aws_route53_zone" "domain" {
+data "aws_route53_zone" "app" {
   name = var.app_domain
+}
+
+data "aws_acm_certificate" "api" {
+  provider = aws.useast1
+  domain = var.app_domain
 }
 
 data "aws_ami" "ubuntu" {
@@ -57,9 +62,6 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
-data "aws_acm_certificate" "subdomain" {
-  domain = var.app_domain
-}
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
@@ -208,7 +210,7 @@ resource "aws_lb_listener" "front_secure" {
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = data.aws_acm_certificate.subdomain.arn
+  certificate_arn   = data.aws_acm_certificate.api.arn
 
   default_action {
     type             = "forward"
@@ -216,9 +218,9 @@ resource "aws_lb_listener" "front_secure" {
   }
 }
 
-resource "aws_route53_record" "bravo" {
-  zone_id = data.aws_route53_zone.domain.zone_id
-  name    = "bravo.${data.aws_route53_zone.domain.name}"
+resource "aws_route53_record" "api" {
+  zone_id = data.aws_route53_zone.app.zone_id
+  name    = var.api_domain
   type    = "A"
   alias {
     name    = aws_lb.app.dns_name
