@@ -43,23 +43,29 @@ Data download, unpacking, and loading can take a long time and should only need 
 - `data_bucket`: name of your s3 bucket without leading protocol (s3://).
 
 ```sh
-ansible-playbook --ssh-common-args='-F inv/deploy-ssh-config' \
-  -i 'inv/deploy-inventory' playbook.yml \
+ansible-playbook --ssh-common-args='-F inv/ssh-config' \
+  -i 'inv/servers' playbook.yml \
   -e ' load_data=true do_download=true data_bucket=your_bucket_name'
 ```
 
+### Full deployment with data loading (no bucket download)
 To load the data only for the cases where it's already in place on disk, only `load_data=true` 
 should be specified since `do_download` is false by default.
+
+```sh
+ansible-playbook --ssh-common-args='-F inv/ssh-config' \
+  -i 'inv/servers' playbook.yml -e ' load_data=true'
+```
 
 ### Deployment including dependencies:
 Updates the machine, installs dependencies, installs application.
 ```
-ansible-playbook --ssh-common-args='-F inv/deploy-ssh-config' -i 'inv/deploy-inventory' playbook.yml
+ansible-playbook --ssh-common-args='-F inv/ssh-config' -i 'inv/servers' playbook.yml
 ```
 
 ### Just redeploy the python application:
 Only update the application and restart the systemd service running it.
 ```
-ansible-playbook --ssh-common-args='-F inv/deploy-ssh-config'\
-  -i 'inv/deploy-inventory' --tags instance playbook.yml
+ansible-playbook --ssh-common-args='-F inv/ssh-config'\
+  -i 'inv/servers' --tags instance playbook.yml
 ```

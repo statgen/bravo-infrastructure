@@ -35,27 +35,34 @@ PET_NAME=$(echo "${TERRAFORM_JSON}" | jq -r '.pet_name')
 BASTION_PUBLIC_IP=$(echo "${TERRAFORM_JSON}" | jq -r '.bastion_public_ip')
 APP_SERVER_PRIVATE_IP=$(echo "${TERRAFORM_JSON}" | jq -r '.app_server_private_ip[0]')
 
+echo "Terraform workspace data:"
 echo "${TERRAFORM_JSON}"
 
 # Make inv dir for inventory and ssh config
 mkdir -p inv
 
 # Write ssh config
-cat << SSHDOC > inv/deploy-ssh-config
+echo "Writing ssh config: inv/ssh-config"
+cat << SSHDOC > inv/ssh-config
 Host ${PET_NAME}-bastion
   User ec2-user
   Hostname ${BASTION_PUBLIC_IP}
+  TCPKeepAlive yes
+  ServerAliveInterval 240
   Port 22
 
 Host ${PET_NAME}-app
   User ubuntu
   Hostname ${APP_SERVER_PRIVATE_IP}
   ProxyJump ${PET_NAME}-bastion
+  TCPKeepAlive yes
+  ServerAliveInterval 240
   Port 22
 SSHDOC
 
 # write inventory
-cat << INVENTORYDOC > inv/deploy-inventory
+echo "Writing inventory: inv/servers"
+cat << INVENTORYDOC > inv/servers
 [bastion]
 ${PET_NAME}-bastion
 site_bucket=${SITE_BUCKET}
@@ -67,5 +74,5 @@ ${PET_NAME}-app data_bucket=${BUCKET_NAME}
 ${PET_NAME}-app
 INVENTORYDOC
 
-echo -e "# Run ansible playbook\n\
-ansible-playbook --ssh-common-args='-F inv/deploy-ssh-config' -i 'inv/deploy-inventory' playbook.yml\n"
+echo -e "To run ansible playbook:\n\
+ansible-playbook --ssh-common-args='-F inv/ssh-config' -i 'inv/servers' playbook.yml\n"
