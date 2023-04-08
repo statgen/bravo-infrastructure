@@ -1,3 +1,8 @@
 ---
+# testing cors
+# cors_origins:
+#   - 'https://bravue.fraist.org'
+
+# prod cors
 cors_origins:
-  - 'https://bravue.fraist.org'
+  - 'https://genome-bravo.org'
