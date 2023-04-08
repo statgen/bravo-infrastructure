@@ -23,7 +23,7 @@ resource "aws_instance" "app_server" {
 resource "aws_ebs_volume" "app_data" {
   availability_zone = data.aws_availability_zones.available.names[0]
   type = "io2"
-  iops = 125
+  iops = 5000
   size = var.app_volume_size
 }
 
