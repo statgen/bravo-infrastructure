@@ -22,6 +22,12 @@ variable "app_volume_size" {
   default     = 100
 }
 
+variable "db_volume_size" {
+  description = "Size in Gb of attached volume for database"
+  type        = number
+  default     = 30
+}
+
 variable "app_domain" {
   description = "Hosted Zone name covering the api and ui domains."
   type        = string
@@ -44,6 +50,12 @@ variable "app_inst_type" {
   description = "Instance type for application"
   type        = string
   default     = "t3a.large"
+}
+
+variable "db_inst_type" {
+  description = "Instance type for database"
+  type        = string
+  default     = "r7g.medium"
 }
 
 variable "vpc_cidr_block" {

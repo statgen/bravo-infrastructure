@@ -10,6 +10,10 @@ output "app_server_private_ip" {
   value = "${aws_instance.app_server.*.private_ip}"
 }
 
+output "db_server_private_ip" {
+  value = "${aws_instance.db_server.private_ip}"
+}
+
 output "pet_name" {
   value = "${random_pet.app.id}"
 }

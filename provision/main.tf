@@ -49,8 +49,27 @@ data "aws_ami" "ubuntu" {
     values = ["hvm"]
   }
 
-  owners = ["099720109477"] # Canonical
+  # Canonical
+  owners = ["099720109477"] 
 }
+
+data "aws_ami" "arm_db" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-arm64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  # Canonical
+  owners = ["099720109477"]
+}
+
 
 data "aws_ami" "amazon_linux" {
   most_recent = true
@@ -110,6 +129,31 @@ module "app_security_group" {
     { 
       rule                     = "http-8080-tcp",
       source_security_group_id = module.lb_security_group.security_group_id 
+    },
+  ]
+  number_of_computed_ingress_with_source_security_group_id = 1
+}
+
+module "db_security_group" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "4.2.0"
+
+  name        = "db-sg"
+  description = "Security group for db-servers to communicate with app servers."
+  vpc_id      = module.vpc.vpc_id
+
+  computed_egress_with_source_security_group_id = [
+    { 
+      rule                     = "mongodb-27017-tcp",
+      source_security_group_id = module.app_security_group.security_group_id 
+    },
+  ]
+  number_of_computed_egress_with_source_security_group_id = 1
+
+  computed_ingress_with_source_security_group_id = [
+    { 
+      rule                     = "mongodb-27017-tcp",
+      source_security_group_id = module.app_security_group.security_group_id 
     },
   ]
   number_of_computed_ingress_with_source_security_group_id = 1
