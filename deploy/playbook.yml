@@ -1,5 +1,5 @@
 ---
-- hosts: app
+- hosts: "app:mongo"
   become: yes
   tags:
     - dependencies
@@ -8,6 +8,22 @@
       ansible.builtin.apt:
         update_cache: yes
         upgrade: 'yes'
+
+    - name: Register reboot required file
+      stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+
+    - name: Reboot if Required
+      reboot:
+      when: reboot_required.stat.exists
+
+- hosts: app
+  become: yes
+  tags:
+    - dependencies
+    - python
+  tasks:
 
     - name: Install python deployment dependencies
       ansible.builtin.apt:
@@ -28,21 +44,7 @@
           - botocore
         state: present
 
-- hosts: app
-  become: yes
-  tags:
-    - dependencies
-  tasks:
-    - name: Register reboot required file
-      stat:
-        path: /var/run/reboot-required
-      register: reboot_required
-
-    - name: Reboot if Required
-      reboot:
-      when: reboot_required.stat.exists
-
-- hosts: app
+- hosts: "app:mongo"
   tags:
     - setup
   tasks:
@@ -81,6 +83,9 @@
   become: no
   tags:
     - instance
+  vars:
+    mongo_host: "{{ groups['mongo'] | first }}"
+    mongo_ip: "{{ hostvars[mongo_host]['private_ip'] }}"
   tasks:
     - name: Create API instance dir
       ansible.builtin.file:
@@ -151,6 +156,12 @@
         path: /etc/mongod.conf
         search_string: "  dbPath: /var/lib/mongodb"
         line: "  dbPath: {{base_dir}}/mongodata"
+        state: present
+    - name: Change mongo db ip binding
+      ansible.builtin.lineinfile:
+        path: /etc/mongod.conf
+        search_string: "  bindIp: 127.0.0.1"
+        line: "  bindIp: 0.0.0.0"
         state: present
 
 - hosts: mongo

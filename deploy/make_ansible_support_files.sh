@@ -34,6 +34,7 @@ SITE_BUCKET=$(echo "${TERRAFORM_JSON}" | jq -r '.static_site_bucket')
 PET_NAME=$(echo "${TERRAFORM_JSON}" | jq -r '.pet_name')
 BASTION_PUBLIC_IP=$(echo "${TERRAFORM_JSON}" | jq -r '.bastion_public_ip')
 APP_SERVER_PRIVATE_IP=$(echo "${TERRAFORM_JSON}" | jq -r '.app_server_private_ip[0]')
+DB_SERVER_PRIVATE_IP=$(echo "${TERRAFORM_JSON}" | jq -r '.db_server_private_ip')
 
 echo "Terraform workspace data:"
 echo "${TERRAFORM_JSON}"
@@ -58,9 +59,18 @@ Host ${PET_NAME}-app
   TCPKeepAlive yes
   ServerAliveInterval 240
   Port 22
+
+Host ${PET_NAME}-db
+  User ubuntu
+  Hostname ${DB_SERVER_PRIVATE_IP}
+  ProxyJump ${PET_NAME}-bastion
+  TCPKeepAlive yes
+  ServerAliveInterval 240
+  Port 22
 SSHDOC
 
-# write inventory
+# Write Inventory
+#   Include IPs so that playbook can access them.
 echo "Writing inventory: inv/servers"
 cat << INVENTORYDOC > inv/servers
 [bastion]
@@ -68,10 +78,10 @@ ${PET_NAME}-bastion
 site_bucket=${SITE_BUCKET}
 
 [app]
-${PET_NAME}-app data_bucket=${BUCKET_NAME}
+${PET_NAME}-app data_bucket=${BUCKET_NAME} private_ip=${APP_SERVER_PRIVATE_IP}
 
 [mongo]
-${PET_NAME}-app
+${PET_NAME}-db private_ip=${DB_SERVER_PRIVATE_IP}
 INVENTORYDOC
 
 echo -e "To run ansible playbook:\n\
