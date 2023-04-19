@@ -11,6 +11,10 @@ resource "aws_instance" "db_server" {
 
   user_data = var.install_httpd ? file("${path.module}/init-script.sh") : null
 
+  root_block_device {
+    volume_size = 40
+  }
+
   tags = {
     Name = "bravo-db"
   }

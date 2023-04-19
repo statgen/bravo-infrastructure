@@ -122,16 +122,24 @@ module "app_security_group" {
       rule                     = "http-8080-tcp",
       source_security_group_id = module.lb_security_group.security_group_id 
     },
+    { 
+      rule                     = "mongodb-27017-tcp",
+      source_security_group_id = module.db_security_group.security_group_id 
+    },
   ]
-  number_of_computed_egress_with_source_security_group_id = 1
+  number_of_computed_egress_with_source_security_group_id = 2
 
   computed_ingress_with_source_security_group_id = [
     { 
       rule                     = "http-8080-tcp",
       source_security_group_id = module.lb_security_group.security_group_id 
     },
+    { 
+      rule                     = "mongodb-27017-tcp",
+      source_security_group_id = module.db_security_group.security_group_id 
+    },
   ]
-  number_of_computed_ingress_with_source_security_group_id = 1
+  number_of_computed_ingress_with_source_security_group_id = 2
 }
 
 module "db_security_group" {
