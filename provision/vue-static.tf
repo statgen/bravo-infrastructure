@@ -1,7 +1,7 @@
-data "aws_acm_certificate" "ui_domain" {
+data "aws_acm_certificate" "ui" {
   # Domain cert for CDN needs to be looked up in us-east-1 
   provider = aws.useast1
-  domain = var.ui_domain
+  domain = var.ui_cert_domain
 }
 
 # Policy doc to permit cloudfront to access anything in the bucket
@@ -20,19 +20,19 @@ data "aws_iam_policy_document" "cf_access" {
 ## S3 Bucket to store the static website
 resource "aws_s3_bucket" "vue_site" {
   bucket = "${random_pet.app.id}-vue-site"
-  acl    = "public-read"
-
   force_destroy = true
-
-  website {
-    index_document = "index.html"
-    error_document = "404.html"
-  }
 
   tags = {
     # Cannot use computed tag in addtion to default tags.
     # https://github.com/hashicorp/terraform-provider-aws/issues/19583
     # Changed   = formatdate("YYYY-MM-DD hh:mm ZZZ", timestamp())
+  }
+}
+
+resource "aws_s3_bucket_ownership_controls" "vue_site" {
+  bucket = aws_s3_bucket.vue_site.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
   }
 }
 
@@ -93,7 +93,7 @@ resource "aws_cloudfront_distribution" "website_cdn_root" {
   }
 
   viewer_certificate {
-    acm_certificate_arn = data.aws_acm_certificate.ui_domain.arn
+    acm_certificate_arn = data.aws_acm_certificate.ui.arn
     ssl_support_method  = "sni-only"
   }
 

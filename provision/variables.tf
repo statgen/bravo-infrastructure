@@ -28,8 +28,14 @@ variable "db_volume_size" {
   default     = 30
 }
 
-variable "app_domain" {
-  description = "Hosted Zone name covering the api and ui domains."
+variable "api_cert_domain" {
+  description = "Name of domain of ACM cert covering the api_domain."
+  type        = string
+  default     = "false"
+}
+
+variable "ui_cert_domain" {
+  description = "Name of domain of ACM cert covering the ui_domain."
   type        = string
   default     = "false"
 }

@@ -28,12 +28,11 @@ data "aws_availability_zones" "available" {
 }
 
 data "aws_route53_zone" "app" {
-  name = var.app_domain
+  name = var.api_cert_domain
 }
 
 data "aws_acm_certificate" "api" {
-  provider = aws.useast1
-  domain = var.app_domain
+  domain = var.api_cert_domain
 }
 
 data "aws_ami" "ubuntu" {
