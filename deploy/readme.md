@@ -13,9 +13,12 @@ Three roles:
 - Requires `bravo_vignette_data.tar.bz2` in an accessible S3 bucket.
 
 ## Data Loading
-The data loading step is expensive.
+The data loading step is time consuming.
 The role creates lock files to indicate that it's already been run.
 This facilitates a hack to avoid trying to figure out if data needs to be reloaded.
+If data loading needs to be re-done, the lock files on the app server must be removed.
+
+The download task is time consuming, but does **not** produce a lock file nor check if files are already present.
 
 ## Auth Configuration
 To enable OAuth using Google as the identity provider, the client id and secrent must be given.
