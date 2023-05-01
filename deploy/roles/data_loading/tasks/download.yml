@@ -6,9 +6,15 @@
     mode: list
   register: s3list
 
-- name: Convenience list of relative paths
+- name: Convenience list of paths relative to data_key
   ansible.builtin.set_fact:
     rel_paths: "{{ s3list.s3_keys | map('replace', data_key + '/', '', 1) }}"
+  when: data_key | length > 0
+
+- name: Convenience list of paths relative bucket root
+  ansible.builtin.set_fact:
+    rel_paths: "{{ s3list.s3_keys }}"
+  when: data_key | length == 0
 
 - name: Create data subdirectories
   ansible.builtin.file:

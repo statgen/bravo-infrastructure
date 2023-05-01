@@ -5,7 +5,10 @@
 #  - ansible inventory
 
 # Get workspace name from env or use default
-WORKSPACE_NAME="${WORKSPACE_NAME:=bravo-ci-staging}"
+WORKSPACE_NAME="${WORKSPACE_NAME:=bravo_staging}"
+
+# Ansible group names can't have -, substitute _
+ANSIBLE_GROUP_NAME=$(echo "${WORKSPACE_NAME}" | tr '-' '_')
 
 # Get terraform cloud token from credentials file 
 JQ_EXP='."credentials"."app.terraform.io"."token"'
@@ -82,6 +85,11 @@ ${PET_NAME}-app data_bucket=${BUCKET_NAME} private_ip=${APP_SERVER_PRIVATE_IP}
 
 [mongo]
 ${PET_NAME}-db private_ip=${DB_SERVER_PRIVATE_IP}
+
+[${ANSIBLE_GROUP_NAME}:children]
+bastion
+app
+mongo
 INVENTORYDOC
 
 echo -e "To run ansible playbook:\n\
