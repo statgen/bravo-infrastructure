@@ -1,8 +1,0 @@
----
-- name: Download data from S3
-  import_tasks: download.yml
-  when: do_download | bool
-
-- name: Load data into mongo db
-  import_tasks: loading.yml
-  when: do_loading | bool
