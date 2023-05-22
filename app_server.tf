@@ -1,3 +1,25 @@
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  filter {
+    name = "creation-date"
+    values = ["2023-03*"]
+  }
+
+  # Canonical
+  owners = ["099720109477"] 
+}
+
 resource "aws_instance" "app_server" {
   count = var.enable_app_server_env ? var.app_server_instance_count : 0
 

@@ -1,3 +1,25 @@
+data "aws_ami" "arm_db" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-arm64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  filter {
+    name = "creation-date"
+    values = ["2023-03*"]
+  }
+
+  # Canonical
+  owners = ["099720109477"]
+}
+
 resource "aws_instance" "db_server" {
   ami                    = data.aws_ami.arm_db.id
   instance_type          = var.db_inst_type
