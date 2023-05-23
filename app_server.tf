@@ -11,11 +11,6 @@ data "aws_ami" "ubuntu" {
     values = ["hvm"]
   }
 
-  filter {
-    name = "creation-date"
-    values = ["2023-03*"]
-  }
-
   # Canonical
   owners = ["099720109477"] 
 }
@@ -23,7 +18,7 @@ data "aws_ami" "ubuntu" {
 resource "aws_instance" "app_server" {
   count = var.enable_app_server_env ? var.app_server_instance_count : 0
 
-  ami                    = var.app_ami ? var.app_ami : data.aws_ami.ubuntu.id
+  ami                    = var.app_ami == "" ? data.aws_ami.ubuntu.id : var.app_ami
   instance_type          = var.app_inst_type
   subnet_id              = module.vpc.private_subnets[count.index % length(module.vpc.public_subnets)]
   vpc_security_group_ids = [module.app_security_group.security_group_id,

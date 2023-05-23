@@ -11,9 +11,15 @@ variable "env_tag" {
 }
 
 variable "app_ami" {
-  description = "AMI to use for the application"
+  description = "AMI to use for the application vm. Leave blank to lookup most recent ami."
   type        = string
-  default     = "false"
+  default     = ""
+}
+
+variable "db_ami" {
+  description = "AMI to use for the mongo vm. Should be ARM architecture. Leave blank to lookup most recent ami."
+  type        = string
+  default     = ""
 }
 
 variable "app_volume_size" {
@@ -59,7 +65,7 @@ variable "app_inst_type" {
 }
 
 variable "db_inst_type" {
-  description = "Instance type for database"
+  description = "Instance type for database. Should be ARM architecture."
   type        = string
   default     = "r7g.medium"
 }

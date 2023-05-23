@@ -11,17 +11,12 @@ data "aws_ami" "arm_db" {
     values = ["hvm"]
   }
 
-  filter {
-    name = "creation-date"
-    values = ["2023-03*"]
-  }
-
   # Canonical
   owners = ["099720109477"]
 }
 
 resource "aws_instance" "db_server" {
-  ami                    = data.aws_ami.arm_db.id
+  ami                    = var.db_ami == "" ? data.aws_ami.arm_db.id : var.db_ami
   instance_type          = var.db_inst_type
   subnet_id              = module.vpc.private_subnets[0]
   vpc_security_group_ids = [module.db_security_group.security_group_id,
