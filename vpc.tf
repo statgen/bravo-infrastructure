@@ -83,6 +83,7 @@ module "db_security_group" {
   number_of_computed_ingress_with_source_security_group_id = 1
 }
 
+
 module "updates_security_group" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "4.2.0"
@@ -190,4 +191,9 @@ data "aws_vpc_endpoint_service" "s3" {
 resource "aws_vpc_endpoint" "s3" {
   vpc_id       = module.vpc.vpc_id
   service_name = data.aws_vpc_endpoint_service.s3.service_name
+}
+
+resource "aws_vpc_endpoint_route_table_association" "s3_route" {
+  route_table_id  = module.vpc.private_route_table_ids[0]
+  vpc_endpoint_id = aws_vpc_endpoint.s3.id
 }
