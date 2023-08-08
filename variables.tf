@@ -52,10 +52,16 @@ variable "api_domain" {
   default     = "false"
 }
 
-variable "ui_domain" {
-  description = "Domain to direct to static site (UI)."
+variable "ui_domain_aws" {
+  description = "Domains to direct to static site (UI)."
   type        = string
-  default     = "false"
+  default     = "genome-bravo.org"
+}
+
+variable "ui_domain_ext" {
+  description = "Domains to direct to static site (UI)."
+  type        = string
+  default     = "bravobeta.sph.umich.edu"
 }
 
 variable "app_inst_type" {

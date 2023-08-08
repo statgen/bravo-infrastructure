@@ -33,6 +33,7 @@ data "aws_route53_zone" "app" {
 
 data "aws_acm_certificate" "api" {
   domain = var.api_cert_domain
+  most_recent = true
 }
 
 resource "aws_route53_record" "api" {

@@ -30,10 +30,14 @@ output "api_domain" {
   value = var.api_domain
 }
 
-output "ui_domain" {
-  value = var.ui_domain
+output "ui_domains" {
+  value = ["${var.ui_domain_aws}", "${var.ui_domain_ext}"]
 }
 
 output "env_tag" {
   value = var.env_tag
+}
+
+output "cloudfront_domain" {
+  value = "${aws_cloudfront_distribution.website_cdn_root.domain_name}"
 }
