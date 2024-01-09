@@ -24,7 +24,7 @@ resource "aws_instance" "db_server" {
                             module.updates_security_group.security_group_id]
 
   key_name               = var.key_pair_name
-  iam_instance_profile   = aws_iam_instance_profile.s3_read_bucket.name
+  iam_instance_profile   = aws_iam_instance_profile.s3_backup.name
   associate_public_ip_address = false
 
   user_data = var.install_httpd ? file("${path.module}/init-script.sh") : null
