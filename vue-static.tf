@@ -2,6 +2,7 @@ data "aws_acm_certificate" "ui" {
   # Domain cert for CDN needs to be looked up in us-east-1 
   provider = aws.useast1
   domain = var.ui_cert_domain
+  key_types = ["RSA_2048", "EC_prime256v1"]
   most_recent = true
 }
 
@@ -65,7 +66,7 @@ resource "aws_cloudfront_distribution" "website_cdn_root" {
   
   # See: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/PriceClass.html
   price_class = "PriceClass_100"
-  aliases = ["${var.ui_domain_aws}", "${var.ui_domain_ext}"]
+  aliases = concat(["${var.ui_domain_aws}"], "${var.ui_domain_ext}")
 
   origin {
     origin_id   = "origin-bucket-${aws_s3_bucket.vue_site.id}"
@@ -105,7 +106,8 @@ resource "aws_cloudfront_distribution" "website_cdn_root" {
   }
 
   viewer_certificate {
-    acm_certificate_arn = data.aws_acm_certificate.ui.arn
+    # Use ARN override if defined, otherwise default to looked up cert.
+    acm_certificate_arn = coalesce(var.ui_cert_arn, data.aws_acm_certificate.ui.arn)
     ssl_support_method  = "sni-only"
   }
 

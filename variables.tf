@@ -46,6 +46,12 @@ variable "ui_cert_domain" {
   default     = "false"
 }
 
+variable "ui_cert_arn" {
+  description = "Optional ARN of cert covering the ui_domain to override domain cert lookup."
+  type        = string
+  default     = null
+}
+
 variable "api_domain" {
   description = "Domain to direct to load balancer."
   type        = string
@@ -60,8 +66,8 @@ variable "ui_domain_aws" {
 
 variable "ui_domain_ext" {
   description = "Domains to direct to static site (UI)."
-  type        = string
-  default     = "bravobeta.sph.umich.edu"
+  type        = list(string)
+  default     = ["bravobeta.sph.umich.edu"]
 }
 
 variable "app_inst_type" {
