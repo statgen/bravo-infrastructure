@@ -32,7 +32,9 @@ data "aws_route53_zone" "app" {
 }
 
 data "aws_acm_certificate" "api" {
+  provider = aws.useast1
   domain = var.api_cert_domain
+  key_types = ["RSA_2048", "EC_prime256v1"]
   most_recent = true
 }
 

@@ -42,6 +42,10 @@ output "cloudfront_domain" {
   value = "${aws_cloudfront_distribution.website_cdn_root.domain_name}"
 }
 
-output "acm_cert_id" {
+output "ui_acm_cert_id" {
   value = data.aws_acm_certificate.ui.id
+}
+
+output "api_acm_cert_id" {
+  value = data.aws_acm_certificate.api.id
 }
