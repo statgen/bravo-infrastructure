@@ -27,7 +27,7 @@ resource "aws_instance" "db_server" {
   iam_instance_profile   = aws_iam_instance_profile.s3_backup.name
   associate_public_ip_address = false
 
-  user_data = var.install_httpd ? file("${path.module}/init-script.sh") : null
+  user_data = var.install_httpd ? file("${path.module}/scripts/init-script.sh") : null
 
   root_block_device {
     volume_size = 40

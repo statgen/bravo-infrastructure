@@ -30,7 +30,7 @@ resource "aws_instance" "app_server" {
   iam_instance_profile   = aws_iam_instance_profile.s3_read_bucket.name
   associate_public_ip_address = false
 
-  user_data = var.install_httpd ? file("${path.module}/init-script.sh") : null
+  user_data = var.install_httpd ? file("${path.module}/scripts/init-script.sh") : null
 
   tags = {
     Name = "version-1.0-${count.index}"
