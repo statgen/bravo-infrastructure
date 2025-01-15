@@ -1,6 +1,6 @@
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "4.0.2"
+  version = "5.17.0"
 
   name = "main-vpc"
   cidr = var.vpc_cidr_block
@@ -27,7 +27,7 @@ module "vpc" {
 
 module "app_security_group" {
   source  = "terraform-aws-modules/security-group/aws"
-  version = "4.2.0"
+  version = "5.3.0"
 
   name        = "web-sg"
   description = "Security group for web-servers to communicate with load balancer."
