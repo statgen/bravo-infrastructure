@@ -96,6 +96,11 @@ resource "aws_cloudfront_distribution" "website_cdn_root" {
         forward = "none"
       }
     }
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.request_redirect.arn
+    }
   }
 
   restrictions {
@@ -121,7 +126,6 @@ resource "aws_cloudfront_distribution" "website_cdn_root" {
   tags = {
     # Cannot use computed tag in addtion to default tags.
     # https://github.com/hashicorp/terraform-provider-aws/issues/19583
-    # Changed   = formatdate("YYYY-MM-DD hh:mm ZZZ", timestamp())
   }
 }
 
@@ -135,4 +139,12 @@ resource "aws_route53_record" "ui" {
     zone_id                = aws_cloudfront_distribution.website_cdn_root.hosted_zone_id
     evaluate_target_health = false
   }
+}
+
+resource "aws_cloudfront_function" "request_redirect" {
+  name    = "request_redirect"
+  runtime = "cloudfront-js-2.0"
+  comment = "Redirect requests to legacy apps to correct subdomain."
+  publish = true
+  code    = file("${path.module}/scripts/redirect_legacy.js")
 }
