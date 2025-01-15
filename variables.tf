@@ -67,7 +67,7 @@ variable "ui_domain_aws" {
 variable "ui_domain_ext" {
   description = "Domains to direct to static site (UI)."
   type        = list(string)
-  default     = ["bravobeta.sph.umich.edu"]
+  default     = []
 }
 
 variable "app_inst_type" {
