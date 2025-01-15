@@ -142,7 +142,7 @@ resource "aws_route53_record" "ui" {
 }
 
 resource "aws_cloudfront_function" "request_redirect" {
-  name    = "request_redirect"
+  name    = "request_redirect_${var.env_tag}"
   runtime = "cloudfront-js-2.0"
   comment = "Redirect requests to legacy apps to correct subdomain."
   publish = true
