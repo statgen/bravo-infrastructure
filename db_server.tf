@@ -41,7 +41,7 @@ resource "aws_instance" "db_server" {
 resource "aws_ebs_volume" "db_data" {
   availability_zone = data.aws_availability_zones.available.names[0]
   type = "io2"
-  iops = 3000
+  iops = 1500
   size = var.db_volume_size
 }
 
