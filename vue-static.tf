@@ -114,6 +114,7 @@ resource "aws_cloudfront_distribution" "website_cdn_root" {
     # Use ARN override if defined, otherwise default to looked up cert.
     acm_certificate_arn = coalesce(var.ui_cert_arn, data.aws_acm_certificate.ui.arn)
     ssl_support_method  = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 
   custom_error_response {
