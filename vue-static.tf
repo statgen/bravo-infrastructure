@@ -60,6 +60,20 @@ resource "aws_cloudfront_origin_access_identity" "vue_site" {
   comment = "Access identity for CF to get S3 backed site assets"
 }
 
+resource "aws_cloudfront_response_headers_policy" "hsts" {
+  name = "hsts-policy"
+  comment = "Ensure strict transport security header"
+  security_headers_config {
+    strict_transport_security {
+      access_control_max_age_sec = 31536000
+      include_subdomains         = true
+      override                   = true
+      preload                    = true
+    }
+  }
+  
+}
+
 # Creates the CloudFront distribution to serve the static website
 resource "aws_cloudfront_distribution" "website_cdn_root" {
   enabled     = true
@@ -87,6 +101,7 @@ resource "aws_cloudfront_distribution" "website_cdn_root" {
     default_ttl      = "300"
     max_ttl          = "1200"
 
+    response_headers_policy_id = "${aws_cloudfront_response_headers_policy.hsts.id}"
     viewer_protocol_policy = "redirect-to-https" # Redirects any HTTP request to HTTPS
     compress               = true
 
