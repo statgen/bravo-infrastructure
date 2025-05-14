@@ -174,7 +174,7 @@ resource "aws_lb_listener" "front_secure" {
   load_balancer_arn = aws_lb.app.arn
   port              = "443"
   protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-3-2021-06"
   certificate_arn   = data.aws_acm_certificate.api.arn
 
   default_action {
