@@ -39,7 +39,8 @@ resource "aws_iam_policy" "s3_read_only" {
           "Effect":"Allow",
           "Action":[
             "s3:ListBucket",
-            "s3:GetObject"
+            "s3:GetObject",
+            "s3:GetBucketLocation"
           ],
           "Resource":[
             "${data.aws_s3_bucket.backing.arn}",
