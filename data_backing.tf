@@ -7,6 +7,26 @@ data "aws_s3_bucket" "backing" {
   bucket=var.bucket_name
 }
 
+# Opt-in for additional metrics
+resource "aws_s3_bucket_metric" "coverage_filtered" {
+  bucket = data.aws_s3_bucket.backing.id
+  name   = "BravoCoverage"
+
+  filter {
+    prefix = "runtime/coverage/"
+  }
+}
+
+# Add metrics for vcf objects
+resource "aws_s3_bucket_metric" "vcfs_filtered" {
+  bucket = data.aws_s3_bucket.backing.id
+  name   = "BravoVcfs"
+
+  filter {
+    prefix = "runtime/public-vcfs/"
+  }
+}
+
 # Create policy & role to permit reading from the backing data bucket.
 resource "aws_iam_policy" "s3_read_only" {
   name        = "s3_read_${random_pet.app.id}"
