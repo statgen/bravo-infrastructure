@@ -49,3 +49,11 @@ output "ui_acm_cert_id" {
 output "api_acm_cert_id" {
   value = data.aws_acm_certificate.api.id
 }
+
+output "app_data_ebs_vol_id" {
+  value = aws_ebs_volume.app_data.id
+}
+
+output "db_data_ebs_vol_id" {
+  value = aws_ebs_volume.db_data.id
+}
