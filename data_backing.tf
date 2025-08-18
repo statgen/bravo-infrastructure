@@ -27,7 +27,28 @@ resource "aws_s3_bucket_metric" "vcfs_filtered" {
   }
 }
 
-# Create policy & role to permit reading from the backing data bucket.
+resource "aws_iam_policy" "s3_read_only_lookup" {
+  name        = "s3_read_lookup_${random_pet.app.id}"
+  path        = "/"
+  description = "Allow clients to read the instance profile to use facilitate using STS credentials."
+
+  policy = jsonencode(
+    {
+      "Version":"2012-10-17",
+      "Statement":[
+        {
+          "Effect":"Allow",
+          "Action":[
+            "iam:GetInstanceProfile",
+          ],
+          "Resource": "${aws_iam_instance_profile.s3_read_bucket.arn}"
+        }
+      ]
+    }
+  )
+}
+
+# Create policy and role to permit reading from the backing data bucket.
 resource "aws_iam_policy" "s3_read_only" {
   name        = "s3_read_${random_pet.app.id}"
   path        = "/"
@@ -72,7 +93,18 @@ resource "aws_iam_policy" "s3_read_only" {
   )
 }
 
-# Role that the EC2 instance can assume
+############################################
+# Role for EC2 instance allowing S3 access #
+############################################
+
+# Workaround for self referencing role:
+# https://aws.amazon.com/blogs/security/announcing-an-update-to-iam-role-trust-policy-behavior
+data "aws_caller_identity" "current" {}
+
+locals {
+  aws_account_id = data.aws_caller_identity.current.account_id
+}
+
 resource "aws_iam_role" "s3_read_only" {
   name = "s3_read_${random_pet.app.id}"
 
@@ -85,16 +117,22 @@ resource "aws_iam_role" "s3_read_only" {
         Sid    = ""
         Principal = {
           Service = "ec2.amazonaws.com"
+          AWS = "arn:aws:iam::${local.aws_account_id}:role/s3_read_${random_pet.app.id}"
         }
       },
     ]
   })
 }
 
-# Attach managed policy to role
+# Attach managed policies to role
 resource "aws_iam_role_policy_attachment" "s3_read_only" {
   role       = aws_iam_role.s3_read_only.name
   policy_arn = aws_iam_policy.s3_read_only.arn
+}
+
+resource "aws_iam_role_policy_attachment" "lookup_s3_read_only" {
+  role       = aws_iam_role.s3_read_only.name
+  policy_arn = aws_iam_policy.s3_read_only_lookup.arn
 }
 
 resource "aws_iam_instance_profile" "s3_read_bucket" {
