@@ -61,7 +61,7 @@ resource "aws_cloudfront_origin_access_identity" "vue_site" {
 }
 
 resource "aws_cloudfront_response_headers_policy" "hsts" {
-  name = "hsts-policy"
+  name = "${random_pet.app.id}-hsts"
   comment = "Ensure strict transport security header"
   security_headers_config {
     strict_transport_security {
