@@ -28,6 +28,12 @@ variable "app_volume_size" {
   default     = 100
 }
 
+variable "app_root_volume_size" {
+  description = "Size in Gb of volume for app server os"
+  type        = number
+  default     = 8
+}
+
 variable "db_volume_size" {
   description = "Size in Gb of attached volume for database"
   type        = number

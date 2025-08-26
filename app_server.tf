@@ -32,6 +32,10 @@ resource "aws_instance" "app_server" {
 
   user_data = var.install_httpd ? file("${path.module}/scripts/init-script.sh") : null
 
+  root_block_device {
+    volume_size = var.app_root_volume_size
+  }
+
   tags = {
     Name = "version-1.0-${count.index}"
   }
